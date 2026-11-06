@@ -29,7 +29,15 @@
 - **Win Streaks & Records**: Tracks consecutive win streaks, ties, and records your personal best streak.
 - **Animated Winning Lines**: Visual neon lines highlight the winning 3-in-a-row combination with victory sound and confetti.
 
-### 4. 🔊 Built-in Web Audio Synthesizer
+### 4. 🎲 Snake & Ladder Arcade (Multiplayer 2-4 Players)
+- **Multiplayer Pass & Play**: Supports 2, 3, or 4 players on the same device.
+- **Custom Player Profiles & Bots**: Select unique avatars (🦁, 🦊, 🚀, 🤖, etc.), custom names, and toggle any player between Human or Computer Bot.
+- **Classic 100-Tile Serpentine Board**: Visual SVG overlay dynamically rendering dual-rail Ladders and glowing curvy Snakes.
+- **3D Animated Interactive Dice**: Rattling dice roll animation with synthesized rolling and hopping audio.
+- **Special Mechanics**: Roll a 6 for an extra turn, bounce-back rule when exceeding 100, and live event ticker log.
+- **Victory Podium & Confetti**: Celebrates the match champion with sound effects and confetti!
+
+### 5. 🔊 Built-in Web Audio Synthesizer
 - Generates all retro jumps, flap swooshes, coin dings, mark clicks, game over crashes, and victory fanfares directly via the browser's **Web Audio API**.
 - **No external MP3/WAV files required** — eliminates broken audio issues when offline!
 - Includes a global mute/unmute toggle.

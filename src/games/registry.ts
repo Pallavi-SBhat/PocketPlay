@@ -2,6 +2,7 @@ import React from 'react';
 import { GameMetadata } from '../types';
 import { FlappyBirdGame } from './flappy-bird/FlappyBirdGame';
 import { XoxGame } from './xox/XoxGame';
+import { SnakeAndLadderGame } from './snake-and-ladder/SnakeAndLadderGame';
 
 export const GAMES_LIST: GameMetadata[] = [
   {
@@ -47,6 +48,28 @@ export const GAMES_LIST: GameMetadata[] = [
       { key: 'Mouse Click / Tap', action: 'Place your mark on the board' }
     ],
     component: XoxGame
+  },
+  {
+    id: 'snake-ladder',
+    title: 'Snake & Ladder Arcade',
+    tagline: 'Multiplayer 100-tile race with 3D dice, animated snakes & ladders',
+    description: 'Race to square 100 in this thrilling multiplayer classic! Supports 2 to 4 players on the same screen with customizable avatars and optional Computer Bots. Beware of slippery snakes, climb towering ladders, and roll a 6 for bonus turns!',
+    category: 'Classic',
+    tags: ['Multiplayer', '2-4 Players', 'Board Game', 'Bots'],
+    thumbnail: 'https://images.unsplash.com/photo-1610890716171-6b1bb98ffd09?auto=format&fit=crop&w=600&q=80',
+    badge: 'Multiplayer',
+    accentColor: '#10b981',
+    instructions: [
+      'Choose 2, 3, or 4 players with custom tokens, names, or Computer Bots.',
+      'Take turns rolling the animated 3D dice to advance across the 100 tiles.',
+      'Landing on the bottom of a ladder rushes you upwards to safety!',
+      'Landing on a snake head slides your token all the way down its tail.',
+      'Roll a 6 to earn an immediate extra turn! First player to tile 100 wins.'
+    ],
+    controls: [
+      { key: 'Roll Dice Button / Click', action: 'Roll the 3D dice on your turn' }
+    ],
+    component: SnakeAndLadderGame
   }
 ];
 

@@ -23,7 +23,7 @@ export const App: React.FC = () => {
   const [isAddGuideOpen, setIsAddGuideOpen] = useState(false);
   const [inspectedGame, setInspectedGame] = useState<GameMetadata | null>(null);
 
-  const categories = ['All', 'Arcade', 'Strategy', 'Favorites'];
+  const categories = ['All', 'Arcade', 'Strategy', 'Classic', 'Favorites'];
 
   // Filter games based on search and category
   const filteredGames = GAMES_LIST.filter(game => {
@@ -116,6 +116,13 @@ export const App: React.FC = () => {
                     className="px-5 py-3 rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold text-xs sm:text-sm shadow-lg shadow-cyan-500/25 active:scale-95 transition-all flex items-center gap-2"
                   >
                     <span>Play XOX</span>
+                  </button>
+
+                  <button
+                    onClick={() => handleLaunchGame('snake-ladder')}
+                    className="px-5 py-3 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-bold text-xs sm:text-sm shadow-lg shadow-emerald-500/25 active:scale-95 transition-all flex items-center gap-2"
+                  >
+                    <span>Play Snake & Ladder</span>
                   </button>
 
                   <button
