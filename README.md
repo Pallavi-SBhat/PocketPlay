@@ -37,7 +37,14 @@
 - **Special Mechanics**: Roll a 6 for an extra turn, bounce-back rule when exceeding 100, and live event ticker log.
 - **Victory Podium & Confetti**: Celebrates the match champion with sound effects and confetti!
 
-### 5. 🔊 Built-in Web Audio Synthesizer
+### 5. 🔠 Word Finder 1000 (1,000 Levels Word Search)
+- **1,000 Procedural Levels**: 100% offline procedural level generator across 12 distinct themes (Space, Cyber, Wildlife, Fantasy, Oceans, Crystals, Arcade, etc.).
+- **Progressive Difficulty**: 5 difficulty tiers ranging from Apprentice (6×6 grid, 4 words) to Grandmaster (10×10 grid, 8 words with diagonal and reverse directions).
+- **Smooth Touch & Mouse Controls**: Drag/swipe straight lines across the grid or use quick click-start then click-end letter selection.
+- **Level Selector & Chapter Navigator**: Browse all 1,000 levels organized across 10 chapters, track star ratings (up to 3,000 stars!), and jump to any unlocked level.
+- **Hint System & Bonus Tokens**: Reveals starting letter positions of unfound words, with bonus hints earned every 3 levels.
+
+### 6. 🔊 Built-in Web Audio Synthesizer
 - Generates all retro jumps, flap swooshes, coin dings, mark clicks, game over crashes, and victory fanfares directly via the browser's **Web Audio API**.
 - **No external MP3/WAV files required** — eliminates broken audio issues when offline!
 - Includes a global mute/unmute toggle.

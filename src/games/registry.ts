@@ -3,6 +3,7 @@ import { GameMetadata } from '../types';
 import { FlappyBirdGame } from './flappy-bird/FlappyBirdGame';
 import { XoxGame } from './xox/XoxGame';
 import { SnakeAndLadderGame } from './snake-and-ladder/SnakeAndLadderGame';
+import { WordFinderGame } from './word-finder/WordFinderGame';
 
 export const GAMES_LIST: GameMetadata[] = [
   {
@@ -70,6 +71,30 @@ export const GAMES_LIST: GameMetadata[] = [
       { key: 'Roll Dice Button / Click', action: 'Roll the 3D dice on your turn' }
     ],
     component: SnakeAndLadderGame
+  },
+  {
+    id: 'word-finder',
+    title: 'Word Finder 1000',
+    tagline: 'Search & uncover hidden words across 1,000 procedural levels!',
+    description: 'The ultimate offline word search challenge! Journey through 1,000 distinct handcrafted and procedurally generated levels across 12 vibrant themes (Space, Cyber, Wildlife, Magic, Food, Ocean, and more). Drag across letters, uncover secret vocabulary, collect up to 3,000 stars, and use hints when stuck!',
+    category: 'Puzzle',
+    tags: ['1000 Levels', 'Word Search', 'Brain', 'Offline'],
+    thumbnail: 'https://images.unsplash.com/photo-1546776310-eef45dd6d63c?auto=format&fit=crop&w=600&q=80',
+    badge: '1000 Levels',
+    accentColor: '#8b5cf6',
+    instructions: [
+      'Look at the list of hidden target words at the side.',
+      'Drag across letters in the grid (Horizontal, Vertical, or Diagonal) to highlight words.',
+      'Or click the first letter and then click the last letter to select a line.',
+      'Find all hidden words to clear the level and unlock the next challenge.',
+      'Collect up to 3 stars per level and earn free hint tokens every 3 levels!'
+    ],
+    controls: [
+      { key: 'Mouse Drag / Touch Swipe', action: 'Select a line of letters' },
+      { key: 'Click Start then Click End', action: 'Quick click-to-select mode' },
+      { key: 'Hint Button (💡)', action: 'Reveal starting square of an unfound word' }
+    ],
+    component: WordFinderGame
   }
 ];
 

@@ -26,6 +26,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
 
   const flappyHigh = storage.getUserHighScore('flappy-bird', currentUser.id);
   const xoxStreak = storage.getUserHighScore('xox', currentUser.id);
+  const wordStats = storage.getWordFinderStats();
 
   const handleAvatarChange = (avatar: string) => {
     setSelectedAvatar(avatar);
@@ -75,12 +76,12 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
         </div>
 
         {/* Quick Stats Grid */}
-        <div className="grid grid-cols-3 gap-2.5 mb-6">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-6">
           <div className="p-3 rounded-2xl bg-slate-800/60 border border-slate-700/60 text-center">
             <div className="flex justify-center text-indigo-400 mb-1">
               <Gamepad2 size={16} />
             </div>
-            <div className="text-lg font-black text-white">{currentUser.gamesPlayed}</div>
+            <div className="text-base font-black text-white">{currentUser.gamesPlayed}</div>
             <div className="text-[10px] text-slate-400 font-medium">Games Played</div>
           </div>
 
@@ -88,7 +89,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
             <div className="flex justify-center text-amber-400 mb-1">
               <Trophy size={16} />
             </div>
-            <div className="text-lg font-black text-amber-400">{flappyHigh}</div>
+            <div className="text-base font-black text-amber-400">{flappyHigh}</div>
             <div className="text-[10px] text-slate-400 font-medium">Flappy Best</div>
           </div>
 
@@ -96,8 +97,16 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
             <div className="flex justify-center text-cyan-400 mb-1">
               <Trophy size={16} />
             </div>
-            <div className="text-lg font-black text-cyan-400">{xoxStreak}</div>
+            <div className="text-base font-black text-cyan-400">{xoxStreak}</div>
             <div className="text-[10px] text-slate-400 font-medium">XOX Streak</div>
+          </div>
+
+          <div className="p-3 rounded-2xl bg-slate-800/60 border border-slate-700/60 text-center">
+            <div className="flex justify-center text-purple-400 mb-1">
+              <Trophy size={16} />
+            </div>
+            <div className="text-base font-black text-purple-300">Lvl {wordStats.unlockedLevel}</div>
+            <div className="text-[10px] text-slate-400 font-medium">Word Finder</div>
           </div>
         </div>
 

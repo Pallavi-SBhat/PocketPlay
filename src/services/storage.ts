@@ -212,6 +212,76 @@ class StorageService {
     const currentUser = this.getCurrentUser();
     return (currentUser.favorites || []).includes(gameId);
   }
+
+  // Word Finder 1000-Level System
+  public getWordFinderUnlockedLevel(): number {
+    return this.get<number>('gamestack_wordfinder_unlocked', 1);
+  }
+
+  public getWordFinderStarsMap(): Record<number, number> {
+    return this.get<Record<number, number>>('gamestack_wordfinder_stars', {});
+  }
+
+  public getWordFinderHints(): number {
+    return this.get<number>('gamestack_wordfinder_hints', 5);
+  }
+
+  public useWordFinderHint(): boolean {
+    const hints = this.getWordFinderHints();
+    if (hints > 0) {
+      this.set('gamestack_wordfinder_hints', hints - 1);
+      return true;
+    }
+    return false;
+  }
+
+  public addWordFinderHints(count: number): number {
+    const hints = this.getWordFinderHints() + count;
+    this.set('gamestack_wordfinder_hints', hints);
+    return hints;
+  }
+
+  public saveWordFinderLevelComplete(level: number, stars: number, wordsFoundCount: number): { isNewLevel: boolean; newUnlocked: number } {
+    const unlocked = this.getWordFinderUnlockedLevel();
+    const nextUnlocked = Math.max(unlocked, Math.min(1000, level + 1));
+    const isNew = nextUnlocked > unlocked;
+    this.set('gamestack_wordfinder_unlocked', nextUnlocked);
+
+    // Save stars
+    const starsMap = this.getWordFinderStarsMap();
+    const prevStars = starsMap[level] || 0;
+    starsMap[level] = Math.max(prevStars, stars);
+    this.set('gamestack_wordfinder_stars', starsMap);
+
+    // Track total words found
+    const totalWords = this.get<number>('gamestack_wordfinder_total_words', 0) + wordsFoundCount;
+    this.set('gamestack_wordfinder_total_words', totalWords);
+
+    // Grant 1 free hint every 3 levels
+    if (isNew && level % 3 === 0) {
+      this.addWordFinderHints(1);
+    }
+
+    // Record high score
+    this.recordScore('word-finder', nextUnlocked, `Level ${level} completed (${stars}★)`);
+
+    return { isNewLevel: isNew, newUnlocked: nextUnlocked };
+  }
+
+  public getWordFinderStats() {
+    const unlocked = this.getWordFinderUnlockedLevel();
+    const starsMap = this.getWordFinderStarsMap();
+    const totalStars = Object.values(starsMap).reduce((sum, s) => sum + s, 0);
+    const hints = this.getWordFinderHints();
+    const totalWords = this.get<number>('gamestack_wordfinder_total_words', 0);
+
+    return {
+      unlockedLevel: unlocked,
+      totalStars,
+      hints,
+      totalWords
+    };
+  }
 }
 
 export const storage = new StorageService();
