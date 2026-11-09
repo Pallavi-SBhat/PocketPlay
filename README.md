@@ -1,6 +1,6 @@
 # 🕹️ GameStack Arcade - Offline Game Store
 
-**GameStack Arcade** is an offline gaming station and store web application built with **React 19, TypeScript, Tailwind CSS, and Web Audio API**. It lets you play arcade classics offline without requiring any internet connection.
+**GameStack Arcade** is an offline gaming station and store web application built with **React 19, JavaScript (ES6+ / JSX), Tailwind CSS, and Web Audio API**. It lets you play arcade classics offline without requiring any internet connection.
 
 ---
 
@@ -44,7 +44,14 @@
 - **Level Selector & Chapter Navigator**: Browse all 1,000 levels organized across 10 chapters, track star ratings (up to 3,000 stars!), and jump to any unlocked level.
 - **Hint System & Bonus Tokens**: Reveals starting letter positions of unfound words, with bonus hints earned every 3 levels.
 
-### 6. 🔊 Built-in Web Audio Synthesizer
+### 6. 🐍 Retro Neon Snake
+- **Smooth 60fps Canvas Graphics**: Fluid snake slithering with rounded neon segments, animated eyes that track movement direction, and eat particle bursts.
+- **Regular & Golden Bonus Food**: Munch on regular glowing apples (+10 pts) and catch rare timed Golden Stars (+50 pts) for big score surges!
+- **3 Difficulty Speeds**: Casual (relaxed), Normal (classic arcade), and Hardcore (fast reflex test).
+- **Deadly vs Portal Wrap Modes**: Choose between traditional fatal boundary collisions or smooth portal wrap-around screen edges.
+- **Keyboard & Touch Controls**: Play with Arrow keys / WASD on desktop, or the on-screen responsive D-Pad on mobile and touch devices.
+
+### 7. 🔊 Built-in Web Audio Synthesizer
 - Generates all retro jumps, flap swooshes, coin dings, mark clicks, game over crashes, and victory fanfares directly via the browser's **Web Audio API**.
 - **No external MP3/WAV files required** — eliminates broken audio issues when offline!
 - Includes a global mute/unmute toggle.
@@ -81,16 +88,11 @@
 The app is architected with a modular game registry so you can easily drop in new games over the next few days:
 
 ### Step 1: Create your game component
-Create a new file in `src/games/<your-game>/<YourGame>.tsx`:
-```tsx
+Create a new file in `src/games/<your-game>/<YourGame>.jsx`:
+```jsx
 import React from 'react';
 
-interface YourGameProps {
-  onGameOver?: (score: number) => void;
-  onBack?: () => void;
-}
-
-export const YourGame: React.FC<YourGameProps> = ({ onGameOver, onBack }) => {
+export const YourGame = ({ onGameOver, onBack }) => {
   return (
     <div className="flex flex-col items-center justify-center p-8">
       <button onClick={onBack}>Back to Store</button>
@@ -100,19 +102,19 @@ export const YourGame: React.FC<YourGameProps> = ({ onGameOver, onBack }) => {
 };
 ```
 
-### Step 2: Register it in `src/games/registry.ts`
+### Step 2: Register it in `src/games/registry.js`
 Add your game to the `GAMES_LIST` array:
-```ts
+```js
 import { YourGame } from './your-game/YourGame';
 
-export const GAMES_LIST: GameMetadata[] = [
-  // ... existing games (Flappy Bird, XOX)
+export const GAMES_LIST = [
+  // ... existing games
   {
     id: 'your-game',
     title: 'Your Game Title',
     tagline: 'Catchy one-liner',
     description: 'Detailed description of gameplay...',
-    category: 'Arcade', // 'Arcade' | 'Strategy' | 'Puzzle' | 'Action' | 'Classic'
+    category: 'Arcade',
     tags: ['Retro', 'Offline'],
     thumbnail: 'https://...',
     accentColor: '#10b981',
@@ -123,8 +125,6 @@ export const GAMES_LIST: GameMetadata[] = [
 ];
 ```
 
-The GameStack store, search, category filters, and modal launcher will automatically pick up your new game!
-
 ---
 
 ## 📁 Project Architecture
@@ -133,29 +133,36 @@ The GameStack store, search, category filters, and modal launcher will automatic
 GameStack/
 ├── index.html
 ├── package.json
-├── vite.config.ts
+├── vite.config.js
 ├── tailwind.config.js
 ├── src/
-│   ├── main.tsx                # React entry point
-│   ├── App.tsx                 # Arcade store catalog, navigation & state
+│   ├── main.jsx                # React entry point
+│   ├── App.jsx                 # Arcade store catalog, navigation & state
 │   ├── index.css               # Arcade styling, neon glows, retro font
 │   ├── types/
-│   │   └── index.ts            # User, GameMetadata, GameScoreRecord definitions
+│   │   └── index.js            # Category constants & metadata
 │   ├── services/
-│   │   ├── storage.ts          # Offline local storage (Accounts, High scores, Favorites)
-│   │   └── sound.ts            # Web Audio API retro sound synthesizer
+│   │   ├── storage.js          # Offline local storage (Accounts, High scores, Favorites)
+│   │   └── sound.js            # Web Audio API retro sound synthesizer
 │   ├── components/
-│   │   ├── Navbar.tsx          # Brand, sound toggle, offline indicator, profile
-│   │   ├── AuthModal.tsx       # Player login, registration, and avatar selector
-│   │   ├── ProfileModal.tsx    # Player stats, records, and avatar customization
-│   │   ├── GameCard.tsx        # Store game card with preview, badge, high scores
-│   │   ├── GameDetailModal.tsx # How to play, controls, offline leaderboard
-│   │   └── AddGameGuideModal.tsx # Interactive guide for adding future games
+│   │   ├── Navbar.jsx          # Brand, sound toggle, offline indicator, profile
+│   │   ├── AuthModal.jsx       # Player login, registration, and avatar selector
+│   │   ├── ProfileModal.jsx    # Player stats, records, and avatar customization
+│   │   ├── GameCard.jsx        # Store game card with preview, badge, high scores
+│   │   ├── GameDetailModal.jsx # How to play, controls, offline leaderboard
+│   │   └── AddGameGuideModal.jsx # Interactive guide for adding future games
 │   └── games/
-│       ├── registry.ts         # Central game registry for modular expansion
+│       ├── registry.js         # Central game registry for modular expansion
 │       ├── flappy-bird/
-│       │   └── FlappyBirdGame.tsx # Canvas Flappy Bird with physics & sound
-│       └── xox/
-│           └── XoxGame.tsx        # Tic-Tac-Toe with Bot AI & 2-Player mode
+│       │   └── FlappyBirdGame.jsx # Canvas Flappy Bird with physics & sound
+│       ├── xox/
+│       │   └── XoxGame.jsx        # Tic-Tac-Toe with Bot AI & 2-Player mode
+│       ├── snake-and-ladder/
+│       │   └── SnakeAndLadderGame.jsx # Multiplayer 100-tile board game
+│       ├── word-finder/
+│       │   ├── wordData.js        # 1000-level procedural generator
+│       │   └── WordFinderGame.jsx # Word Search with 1000 levels & hints
+│       └── snake/
+│           └── SnakeGame.jsx      # Canvas Retro Neon Snake game
 ```
 

@@ -1,20 +1,13 @@
 import React from 'react';
 import { Play, Trophy, Info, Heart } from 'lucide-react';
-import { GameMetadata } from '../types';
 import { storage } from '../services/storage';
 import { sounds } from '../services/sound';
 
-interface GameCardProps {
-  game: GameMetadata;
-  onPlay: (gameId: string) => void;
-  onInspect: (game: GameMetadata) => void;
-}
-
-export const GameCard: React.FC<GameCardProps> = ({ game, onPlay, onInspect }) => {
-  const [isFav, setIsFav] = React.useState<boolean>(() => storage.isFavorite(game.id));
+export const GameCard = ({ game, onPlay, onInspect }) => {
+  const [isFav, setIsFav] = React.useState(() => storage.isFavorite(game.id));
   const highScore = storage.getHighScore(game.id);
 
-  const handleToggleFavorite = (e: React.MouseEvent) => {
+  const handleToggleFavorite = (e) => {
     e.stopPropagation();
     sounds.playClick();
     const nextFav = storage.toggleFavorite(game.id);

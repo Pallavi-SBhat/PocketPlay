@@ -1,12 +1,6 @@
 // Curated Themed Word Dictionaries and Procedural 1000-Level Generator for Word Finder Arcade
 
-export interface ThemeCategory {
-  name: string;
-  icon: string;
-  words: string[];
-}
-
-export const WORD_THEMES: ThemeCategory[] = [
+export const WORD_THEMES = [
   {
     name: 'Animals & Wildlife',
     icon: '🦁',
@@ -117,27 +111,6 @@ export const WORD_THEMES: ThemeCategory[] = [
   }
 ];
 
-export interface GeneratedWord {
-  word: string;
-  found: boolean;
-  startRow: number;
-  startCol: number;
-  endRow: number;
-  endCol: number;
-  color: string;
-}
-
-export interface LevelData {
-  level: number;
-  themeName: string;
-  themeIcon: string;
-  tierName: string;
-  gridSize: number;
-  grid: string[][];
-  words: GeneratedWord[];
-}
-
-// 8 distinct vibrant neon highlighting colors for found words
 export const WORD_HIGHLIGHT_COLORS = [
   '#06b6d4', // Cyan
   '#ec4899', // Pink
@@ -149,8 +122,7 @@ export const WORD_HIGHLIGHT_COLORS = [
   '#14b8a6', // Teal
 ];
 
-// Linear Congruential Generator for deterministic level generation
-function createPRNG(seed: number) {
+function createPRNG(seed) {
   let s = seed >>> 0;
   return () => {
     s = (Math.imul(1664525, s) + 1013904223) >>> 0;
@@ -158,7 +130,7 @@ function createPRNG(seed: number) {
   };
 }
 
-export function getTierInfo(level: number) {
+export function getTierInfo(level) {
   if (level <= 100) {
     return { name: 'Apprentice', minLength: 3, maxLength: 5, gridSize: 6, wordCount: 4, allowDiagonal: false, allowReverse: false };
   } else if (level <= 300) {
@@ -172,8 +144,7 @@ export function getTierInfo(level: number) {
   }
 }
 
-// Direction vectors: [rowStep, colStep]
-const DIRECTIONS: { [key: string]: [number, number] } = {
+const DIRECTIONS = {
   RIGHT: [0, 1],
   DOWN: [1, 0],
   DOWN_RIGHT: [1, 1],
@@ -184,9 +155,8 @@ const DIRECTIONS: { [key: string]: [number, number] } = {
   UP_RIGHT: [-1, 1]
 };
 
-export function generateLevel(levelNumber: number): LevelData {
+export function generateLevel(levelNumber) {
   const level = Math.max(1, Math.min(1000, levelNumber));
-  // Deterministic seed
   const seed = (level * 104729 + 7919) >>> 0;
   const rand = createPRNG(seed);
 
@@ -194,13 +164,11 @@ export function generateLevel(levelNumber: number): LevelData {
   const themeIdx = Math.floor(rand() * WORD_THEMES.length);
   const theme = WORD_THEMES[themeIdx];
 
-  // Filter suitable words from theme
   const candidateWords = theme.words
     .filter(w => w.length >= tier.minLength && w.length <= Math.min(tier.maxLength, tier.gridSize))
     .sort(() => rand() - 0.5);
 
-  // Available directions based on tier
-  const allowedDirs: [number, number][] = [
+  const allowedDirs = [
     DIRECTIONS.RIGHT,
     DIRECTIONS.DOWN
   ];
@@ -217,15 +185,13 @@ export function generateLevel(levelNumber: number): LevelData {
     }
   }
 
-  // Initialize empty grid
-  const grid: string[][] = Array(tier.gridSize)
+  const grid = Array(tier.gridSize)
     .fill(null)
     .map(() => Array(tier.gridSize).fill(''));
 
-  const placedWords: GeneratedWord[] = [];
+  const placedWords = [];
 
-  // Helper to test if a word can be placed
-  const canPlace = (word: string, r: number, c: number, dr: number, dc: number): boolean => {
+  const canPlace = (word, r, c, dr, dc) => {
     for (let i = 0; i < word.length; i++) {
       const cr = r + dr * i;
       const cc = c + dc * i;
@@ -240,7 +206,7 @@ export function generateLevel(levelNumber: number): LevelData {
     return true;
   };
 
-  const place = (word: string, r: number, c: number, dr: number, dc: number, color: string) => {
+  const place = (word, r, c, dr, dc, color) => {
     for (let i = 0; i < word.length; i++) {
       const cr = r + dr * i;
       const cc = c + dc * i;
@@ -257,9 +223,7 @@ export function generateLevel(levelNumber: number): LevelData {
     });
   };
 
-  // Try placing words
   let wordCandidates = [...candidateWords];
-  // If not enough candidate words, supplement from other themes
   if (wordCandidates.length < tier.wordCount) {
     const backupTheme = WORD_THEMES[(themeIdx + 1) % WORD_THEMES.length];
     wordCandidates = [...wordCandidates, ...backupTheme.words];
@@ -269,8 +233,6 @@ export function generateLevel(levelNumber: number): LevelData {
   for (const word of wordCandidates) {
     if (placedWords.length >= tier.wordCount) break;
 
-    let placed = false;
-    // Up to 120 random placement attempts
     for (let attempt = 0; attempt < 120; attempt++) {
       const dir = allowedDirs[Math.floor(rand() * allowedDirs.length)];
       const r = Math.floor(rand() * tier.gridSize);
@@ -280,13 +242,11 @@ export function generateLevel(levelNumber: number): LevelData {
         const color = WORD_HIGHLIGHT_COLORS[colorIdx % WORD_HIGHLIGHT_COLORS.length];
         colorIdx++;
         place(word, r, c, dir[0], dir[1], color);
-        placed = true;
         break;
       }
     }
   }
 
-  // Fill empty spaces with random uppercase English letters
   const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
   for (let r = 0; r < tier.gridSize; r++) {
     for (let c = 0; c < tier.gridSize; c++) {

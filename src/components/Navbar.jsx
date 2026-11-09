@@ -1,22 +1,14 @@
 import React from 'react';
-import { Gamepad2, Volume2, VolumeX, WifiOff, User as UserIcon, LogIn } from 'lucide-react';
-import { User } from '../types';
+import { Gamepad2, Volume2, VolumeX, WifiOff, LogIn } from 'lucide-react';
 import { sounds } from '../services/sound';
 
-interface NavbarProps {
-  currentUser: User;
-  onOpenAuth: () => void;
-  onOpenProfile: () => void;
-  onNavigateHome: () => void;
-}
-
-export const Navbar: React.FC<NavbarProps> = ({
+export const Navbar = ({
   currentUser,
   onOpenAuth,
   onOpenProfile,
   onNavigateHome,
 }) => {
-  const [isMuted, setIsMuted] = React.useState<boolean>(() => sounds.getMuted());
+  const [isMuted, setIsMuted] = React.useState(() => sounds.getMuted());
 
   const handleToggleSound = () => {
     const next = sounds.toggleMute();
@@ -69,7 +61,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             title={isMuted ? 'Unmute Sound' : 'Mute Sound'}
             className="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700/60 text-slate-300 hover:text-white transition-colors"
           >
-            {isMuted ? <VolumeX size={18} className="text-rose-400" /> : <Volume2 size={18} className="text-emerald-400" />}
+            {isMuted ? <VolumeX size={18} className="text-red-400" /> : <Volume2 size={18} className="text-emerald-400" />}
           </button>
 
           {/* User Profile / Auth Button */}

@@ -1,43 +1,18 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import confetti from 'canvas-confetti';
-import { Play, RotateCcw, Volume2, VolumeX, Trophy, ArrowLeft, Pause, Award } from 'lucide-react';
+import { RotateCcw, Volume2, VolumeX, Trophy, ArrowLeft, Pause, Award } from 'lucide-react';
 import { sounds } from '../../services/sound';
 import { storage } from '../../services/storage';
 
-interface FlappyBirdProps {
-  onGameOver?: (score: number) => void;
-  onBack?: () => void;
-}
-
-interface Pipe {
-  x: number;
-  topHeight: number;
-  bottomY: number;
-  width: number;
-  passed: boolean;
-}
-
-interface Particle {
-  x: number;
-  y: number;
-  vx: number;
-  vy: number;
-  color: string;
-  size: number;
-  life: number;
-  maxLife: number;
-}
-
-export const FlappyBirdGame: React.FC<FlappyBirdProps> = ({ onGameOver, onBack }) => {
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+export const FlappyBirdGame = ({ onGameOver, onBack }) => {
+  const canvasRef = useRef(null);
   
   // Game states: 'idle' | 'playing' | 'gameover' | 'paused'
-  const [gameState, setGameState] = useState<'idle' | 'playing' | 'gameover' | 'paused'>('idle');
-  const [score, setScore] = useState<number>(0);
-  const [highScore, setHighScore] = useState<number>(() => storage.getHighScore('flappy-bird'));
-  const [userHighScore, setUserHighScore] = useState<number>(() => storage.getUserHighScore('flappy-bird'));
-  const [isMuted, setIsMuted] = useState<boolean>(() => sounds.getMuted());
-  const [isNewRecord, setIsNewRecord] = useState<boolean>(false);
+  const [gameState, setGameState] = useState('idle');
+  const [score, setScore] = useState(0);
+  const [highScore, setHighScore] = useState(() => storage.getHighScore('flappy-bird'));
+  const [isMuted, setIsMuted] = useState(() => sounds.getMuted());
+  const [isNewRecord, setIsNewRecord] = useState(false);
 
   // Constants
   const CANVAS_WIDTH = 400;
@@ -52,14 +27,14 @@ export const FlappyBirdGame: React.FC<FlappyBirdProps> = ({ onGameOver, onBack }
 
   // Mutable game simulation refs
   const stateRef = useRef({
-    gameState: 'idle' as 'idle' | 'playing' | 'gameover' | 'paused',
+    gameState: 'idle',
     score: 0,
     birdY: CANVAS_HEIGHT / 2 - 50,
     birdVelocity: 0,
     birdRotation: 0,
     birdFrame: 0,
-    pipes: [] as Pipe[],
-    particles: [] as Particle[],
+    pipes: [],
+    particles: [],
     frameCount: 0,
     groundOffset: 0,
     skyOffset: 0,
@@ -71,7 +46,7 @@ export const FlappyBirdGame: React.FC<FlappyBirdProps> = ({ onGameOver, onBack }
     setIsMuted(muted);
   };
 
-  const createParticles = (x: number, y: number, count: number, colors: string[]) => {
+  const createParticles = (x, y, count, colors) => {
     for (let i = 0; i < count; i++) {
       const angle = Math.random() * Math.PI * 2;
       const speed = 1.5 + Math.random() * 4;
@@ -87,6 +62,26 @@ export const FlappyBirdGame: React.FC<FlappyBirdProps> = ({ onGameOver, onBack }
       });
     }
   };
+
+  const restartGame = useCallback(() => {
+    const s = stateRef.current;
+    s.gameState = 'idle';
+    s.score = 0;
+    s.birdY = CANVAS_HEIGHT / 2 - 50;
+    s.birdVelocity = 0;
+    s.birdRotation = 0;
+    s.birdFrame = 0;
+    s.pipes = [];
+    s.particles = [];
+    s.frameCount = 0;
+    s.groundOffset = 0;
+    s.skyOffset = 0;
+    s.lastScore = 0;
+
+    setScore(0);
+    setGameState('idle');
+    setIsNewRecord(false);
+  }, []);
 
   const handleJump = useCallback(() => {
     const s = stateRef.current;
@@ -106,7 +101,7 @@ export const FlappyBirdGame: React.FC<FlappyBirdProps> = ({ onGameOver, onBack }
     } else if (s.gameState === 'gameover') {
       restartGame();
     }
-  }, []);
+  }, [restartGame]);
 
   const triggerGameOver = useCallback(() => {
     const s = stateRef.current;
@@ -133,36 +128,15 @@ export const FlappyBirdGame: React.FC<FlappyBirdProps> = ({ onGameOver, onBack }
     }
 
     setHighScore(storage.getHighScore('flappy-bird'));
-    setUserHighScore(storage.getUserHighScore('flappy-bird'));
 
     if (onGameOver) {
       onGameOver(finalScore);
     }
   }, [highScore, onGameOver]);
 
-  const restartGame = useCallback(() => {
-    const s = stateRef.current;
-    s.gameState = 'idle';
-    s.score = 0;
-    s.birdY = CANVAS_HEIGHT / 2 - 50;
-    s.birdVelocity = 0;
-    s.birdRotation = 0;
-    s.birdFrame = 0;
-    s.pipes = [];
-    s.particles = [];
-    s.frameCount = 0;
-    s.groundOffset = 0;
-    s.skyOffset = 0;
-    s.lastScore = 0;
-
-    setScore(0);
-    setGameState('idle');
-    setIsNewRecord(false);
-  }, []);
-
   // Listen to keyboard (Space, ArrowUp)
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
+    const handleKeyDown = (e) => {
       if (e.code === 'Space' || e.code === 'ArrowUp') {
         e.preventDefault();
         handleJump();
@@ -183,6 +157,148 @@ export const FlappyBirdGame: React.FC<FlappyBirdProps> = ({ onGameOver, onBack }
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handleJump, restartGame]);
 
+  const birdYMin = (radius, y) => y - radius;
+  const birdYMax = (radius, y) => y + radius;
+
+  // Render Pipe with neon styling & highlight
+  const drawPipe = (ctx, x, y, width, height, isTop) => {
+    if (height <= 0) return;
+    
+    // Pipe body gradient
+    const pipeGrad = ctx.createLinearGradient(x, 0, x + width, 0);
+    pipeGrad.addColorStop(0, '#15803d');
+    pipeGrad.addColorStop(0.3, '#22c55e');
+    pipeGrad.addColorStop(0.7, '#4ade80');
+    pipeGrad.addColorStop(1, '#166534');
+
+    ctx.fillStyle = pipeGrad;
+    ctx.fillRect(x, y, width, height);
+
+    // Border
+    ctx.strokeStyle = '#052e16';
+    ctx.lineWidth = 2.5;
+    ctx.strokeRect(x, y, width, height);
+
+    // Pipe Cap
+    const capHeight = 24;
+    const capExtra = 6;
+    const capX = x - capExtra / 2;
+    const capY = isTop ? y + height - capHeight : y;
+
+    const capGrad = ctx.createLinearGradient(capX, 0, capX + width + capExtra, 0);
+    capGrad.addColorStop(0, '#15803d');
+    capGrad.addColorStop(0.3, '#22c55e');
+    capGrad.addColorStop(0.7, '#4ade80');
+    capGrad.addColorStop(1, '#166534');
+
+    ctx.fillStyle = capGrad;
+    ctx.fillRect(capX, capY, width + capExtra, capHeight);
+    ctx.strokeRect(capX, capY, width + capExtra, capHeight);
+
+    // Pipe Cap Highlight Line
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+    ctx.fillRect(capX + 8, capY + 3, 5, capHeight - 6);
+  };
+
+  // Render ground with animated scrolling pattern
+  const drawGround = (ctx, w, h, gh, offset) => {
+    const gy = h - gh;
+
+    // Top grass strip
+    ctx.fillStyle = '#22c55e';
+    ctx.fillRect(0, gy, w, 14);
+
+    // Dirt base
+    const dirtGrad = ctx.createLinearGradient(0, gy + 14, 0, h);
+    dirtGrad.addColorStop(0, '#78350f');
+    dirtGrad.addColorStop(1, '#451a03');
+    ctx.fillStyle = dirtGrad;
+    ctx.fillRect(0, gy + 14, w, gh - 14);
+
+    // Ground line
+    ctx.strokeStyle = '#14532d';
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    ctx.moveTo(0, gy);
+    ctx.lineTo(w, gy);
+    ctx.stroke();
+
+    // Checker pattern stripes moving
+    ctx.fillStyle = '#16a34a';
+    const stripeW = 16;
+    for (let x = -stripeW; x < w + stripeW; x += stripeW) {
+      const sx = x - offset;
+      ctx.beginPath();
+      ctx.moveTo(sx, gy);
+      ctx.lineTo(sx + 8, gy + 14);
+      ctx.lineTo(sx + 4, gy + 14);
+      ctx.lineTo(sx - 4, gy);
+      ctx.closePath();
+      ctx.fill();
+    }
+  };
+
+  // Render Cute Bird with Wing Flap & Tilt
+  const drawBird = (ctx, x, y, rotation, frame) => {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(rotation);
+
+    // Bird Body (Golden Yellow)
+    const bodyGrad = ctx.createRadialGradient(-2, -2, 2, 0, 0, 16);
+    bodyGrad.addColorStop(0, '#fef08a');
+    bodyGrad.addColorStop(0.6, '#facc15');
+    bodyGrad.addColorStop(1, '#ca8a04');
+
+    ctx.fillStyle = bodyGrad;
+    ctx.beginPath();
+    ctx.arc(0, 0, 15, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.strokeStyle = '#854d0e';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // Wing (animated with frame 0, 1, 2)
+    ctx.fillStyle = '#eab308';
+    ctx.beginPath();
+    const wingY = frame === 1 ? -4 : frame === 2 ? 3 : 0;
+    ctx.ellipse(-6, wingY, 7, 5, -0.2, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+
+    // Big Cartoon Eye
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.arc(6, -5, 6, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+
+    // Pupil
+    ctx.fillStyle = '#0f172a';
+    ctx.beginPath();
+    ctx.arc(8, -5, 2.5, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Beak / Mouth (Orange)
+    ctx.fillStyle = '#ea580c';
+    ctx.beginPath();
+    ctx.moveTo(10, 1);
+    ctx.lineTo(20, 5);
+    ctx.lineTo(10, 9);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+
+    // Cheek Blush
+    ctx.fillStyle = 'rgba(239, 68, 68, 0.4)';
+    ctx.beginPath();
+    ctx.arc(3, 3, 3.5, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.restore();
+  };
+
   // Main Animation Loop
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -190,7 +306,7 @@ export const FlappyBirdGame: React.FC<FlappyBirdProps> = ({ onGameOver, onBack }
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    let animationId: number;
+    let animationId;
 
     const render = () => {
       const s = stateRef.current;
@@ -239,7 +355,7 @@ export const FlappyBirdGame: React.FC<FlappyBirdProps> = ({ onGameOver, onBack }
             sounds.playScore();
           }
 
-          // Pipe Collision (AABB vs Bird Circle)
+          // Pipe Collision
           const inHorizontal = birdX + birdRadius > p.x && birdX - birdRadius < p.x + p.width;
           const hitTopPipe = inHorizontal && birdYMin(birdRadius, s.birdY) < p.topHeight;
           const hitBottomPipe = inHorizontal && birdYMax(birdRadius, s.birdY) > p.bottomY;
@@ -264,7 +380,6 @@ export const FlappyBirdGame: React.FC<FlappyBirdProps> = ({ onGameOver, onBack }
           s.birdVelocity = 0;
         }
       } else if (s.gameState === 'idle') {
-        // Gentle bobbing animation
         s.frameCount++;
         s.birdY = CANVAS_HEIGHT / 2 - 50 + Math.sin(s.frameCount * 0.08) * 6;
         s.birdRotation = 0;
@@ -287,7 +402,7 @@ export const FlappyBirdGame: React.FC<FlappyBirdProps> = ({ onGameOver, onBack }
 
       // Sky Background gradient
       const skyGrad = ctx.createLinearGradient(0, 0, 0, CANVAS_HEIGHT - GROUND_HEIGHT);
-      skyGrad.addColorStop(0, '#1e1b4b'); // Deep indigo night
+      skyGrad.addColorStop(0, '#1e1b4b');
       skyGrad.addColorStop(0.6, '#312e81');
       skyGrad.addColorStop(1, '#4338ca');
       ctx.fillStyle = skyGrad;
@@ -367,149 +482,7 @@ export const FlappyBirdGame: React.FC<FlappyBirdProps> = ({ onGameOver, onBack }
     return () => cancelAnimationFrame(animationId);
   }, [triggerGameOver]);
 
-  const birdYMin = (radius: number, y: number) => y - radius;
-  const birdYMax = (radius: number, y: number) => y + radius;
-
-  // Render Pipe with neon styling & highlight
-  const drawPipe = (ctx: CanvasRenderingContext2D, x: number, y: number, width: number, height: number, isTop: boolean) => {
-    if (height <= 0) return;
-    
-    // Pipe body gradient
-    const pipeGrad = ctx.createLinearGradient(x, 0, x + width, 0);
-    pipeGrad.addColorStop(0, '#15803d');
-    pipeGrad.addColorStop(0.3, '#22c55e');
-    pipeGrad.addColorStop(0.7, '#4ade80');
-    pipeGrad.addColorStop(1, '#166534');
-
-    ctx.fillStyle = pipeGrad;
-    ctx.fillRect(x, y, width, height);
-
-    // Border
-    ctx.strokeStyle = '#052e16';
-    ctx.lineWidth = 2.5;
-    ctx.strokeRect(x, y, width, height);
-
-    // Pipe Cap
-    const capHeight = 24;
-    const capExtra = 6;
-    const capX = x - capExtra / 2;
-    const capY = isTop ? y + height - capHeight : y;
-
-    const capGrad = ctx.createLinearGradient(capX, 0, capX + width + capExtra, 0);
-    capGrad.addColorStop(0, '#15803d');
-    capGrad.addColorStop(0.3, '#22c55e');
-    capGrad.addColorStop(0.7, '#4ade80');
-    capGrad.addColorStop(1, '#166534');
-
-    ctx.fillStyle = capGrad;
-    ctx.fillRect(capX, capY, width + capExtra, capHeight);
-    ctx.strokeRect(capX, capY, width + capExtra, capHeight);
-
-    // Pipe Cap Highlight Line
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
-    ctx.fillRect(capX + 8, capY + 3, 5, capHeight - 6);
-  };
-
-  // Render ground with animated scrolling pattern
-  const drawGround = (ctx: CanvasRenderingContext2D, w: number, h: number, gh: number, offset: number) => {
-    const gy = h - gh;
-
-    // Top grass strip
-    ctx.fillStyle = '#22c55e';
-    ctx.fillRect(0, gy, w, 14);
-
-    // Dirt base
-    const dirtGrad = ctx.createLinearGradient(0, gy + 14, 0, h);
-    dirtGrad.addColorStop(0, '#78350f');
-    dirtGrad.addColorStop(1, '#451a03');
-    ctx.fillStyle = dirtGrad;
-    ctx.fillRect(0, gy + 14, w, gh - 14);
-
-    // Ground line
-    ctx.strokeStyle = '#14532d';
-    ctx.lineWidth = 2.5;
-    ctx.beginPath();
-    ctx.moveTo(0, gy);
-    ctx.lineTo(w, gy);
-    ctx.stroke();
-
-    // Checker pattern stripes moving
-    ctx.fillStyle = '#16a34a';
-    const stripeW = 16;
-    for (let x = -stripeW; x < w + stripeW; x += stripeW) {
-      const sx = x - offset;
-      ctx.beginPath();
-      ctx.moveTo(sx, gy);
-      ctx.lineTo(sx + 8, gy + 14);
-      ctx.lineTo(sx + 4, gy + 14);
-      ctx.lineTo(sx - 4, gy);
-      ctx.closePath();
-      ctx.fill();
-    }
-  };
-
-  // Render Cute Bird with Wing Flap & Tilt
-  const drawBird = (ctx: CanvasRenderingContext2D, x: number, y: number, rotation: number, frame: number) => {
-    ctx.save();
-    ctx.translate(x, y);
-    ctx.rotate(rotation);
-
-    // Bird Body (Golden Yellow)
-    const bodyGrad = ctx.createRadialGradient(-2, -2, 2, 0, 0, 16);
-    bodyGrad.addColorStop(0, '#fef08a');
-    bodyGrad.addColorStop(0.6, '#facc15');
-    bodyGrad.addColorStop(1, '#ca8a04');
-
-    ctx.fillStyle = bodyGrad;
-    ctx.beginPath();
-    ctx.arc(0, 0, 15, 0, Math.PI * 2);
-    ctx.fill();
-
-    ctx.strokeStyle = '#854d0e';
-    ctx.lineWidth = 2;
-    ctx.stroke();
-
-    // Wing (animated with frame 0, 1, 2)
-    ctx.fillStyle = '#eab308';
-    ctx.beginPath();
-    const wingY = frame === 1 ? -4 : frame === 2 ? 3 : 0;
-    ctx.ellipse(-6, wingY, 7, 5, -0.2, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.stroke();
-
-    // Big Cartoon Eye
-    ctx.fillStyle = '#ffffff';
-    ctx.beginPath();
-    ctx.arc(6, -5, 6, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.stroke();
-
-    // Pupil
-    ctx.fillStyle = '#0f172a';
-    ctx.beginPath();
-    ctx.arc(8, -5, 2.5, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Beak / Mouth (Orange)
-    ctx.fillStyle = '#ea580c';
-    ctx.beginPath();
-    ctx.moveTo(10, 1);
-    ctx.lineTo(20, 5);
-    ctx.lineTo(10, 9);
-    ctx.closePath();
-    ctx.fill();
-    ctx.stroke();
-
-    // Cheek Blush
-    ctx.fillStyle = 'rgba(239, 68, 68, 0.4)';
-    ctx.beginPath();
-    ctx.arc(3, 3, 3.5, 0, Math.PI * 2);
-    ctx.fill();
-
-    ctx.restore();
-  };
-
-  const getMedal = (s: number) => {
+  const getMedal = (s) => {
     if (s >= 40) return { title: 'Platinum Medal', color: 'from-cyan-400 to-blue-500', icon: '🏆' };
     if (s >= 25) return { title: 'Gold Medal', color: 'from-amber-300 to-yellow-600', icon: '🥇' };
     if (s >= 10) return { title: 'Silver Medal', color: 'from-slate-300 to-slate-500', icon: '🥈' };

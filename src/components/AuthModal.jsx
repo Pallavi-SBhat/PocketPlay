@@ -1,34 +1,27 @@
 import React, { useState } from 'react';
 import { X, UserPlus, LogIn, Sparkles, CheckCircle2, AlertCircle } from 'lucide-react';
 import { storage, AVATAR_OPTIONS } from '../services/storage';
-import { User } from '../types';
 import { sounds } from '../services/sound';
 
-interface AuthModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onUserChange: (user: User) => void;
-}
-
-export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onUserChange }) => {
-  const [mode, setMode] = useState<'login' | 'register'>('login');
+export const AuthModal = ({ isOpen, onClose, onUserChange }) => {
+  const [mode, setMode] = useState('login');
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [selectedAvatar, setSelectedAvatar] = useState(AVATAR_OPTIONS[0]);
-  const [statusMessage, setStatusMessage] = useState<{ type: 'error' | 'success'; text: string } | null>(null);
+  const [statusMessage, setStatusMessage] = useState(null);
 
   const existingUsers = storage.getUsers();
 
   if (!isOpen) return null;
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = (e) => {
     e.preventDefault();
     sounds.playClick();
     const result = storage.login(username);
     if (result.success && result.user) {
       setStatusMessage({ type: 'success', text: result.message });
       setTimeout(() => {
-        onUserChange(result.user!);
+        onUserChange(result.user);
         onClose();
         setStatusMessage(null);
         setUsername('');
@@ -38,14 +31,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onUserCha
     }
   };
 
-  const handleQuickSelectUser = (u: User) => {
+  const handleQuickSelectUser = (u) => {
     sounds.playClick();
     storage.setCurrentUser(u);
     onUserChange(u);
     onClose();
   };
 
-  const handleRegister = (e: React.FormEvent) => {
+  const handleRegister = (e) => {
     e.preventDefault();
     sounds.playClick();
     const result = storage.register(username, email, selectedAvatar);
@@ -53,7 +46,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onUserCha
       setStatusMessage({ type: 'success', text: result.message });
       sounds.playVictory();
       setTimeout(() => {
-        onUserChange(result.user!);
+        onUserChange(result.user);
         onClose();
         setStatusMessage(null);
         setUsername('');

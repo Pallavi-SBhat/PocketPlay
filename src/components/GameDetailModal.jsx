@@ -1,16 +1,9 @@
 import React from 'react';
-import { X, Play, Trophy, Keyboard, BookOpen, Sparkles } from 'lucide-react';
-import { GameMetadata } from '../types';
+import { X, Play, Trophy, Keyboard, BookOpen } from 'lucide-react';
 import { storage } from '../services/storage';
 import { sounds } from '../services/sound';
 
-interface GameDetailModalProps {
-  game: GameMetadata | null;
-  onClose: () => void;
-  onPlay: (gameId: string) => void;
-}
-
-export const GameDetailModal: React.FC<GameDetailModalProps> = ({ game, onClose, onPlay }) => {
+export const GameDetailModal = ({ game, onClose, onPlay }) => {
   if (!game) return null;
 
   const leaderboard = storage.getLeaderboard(game.id, 5);

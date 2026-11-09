@@ -9,19 +9,18 @@ import { AddGameGuideModal } from './components/AddGameGuideModal';
 import { GAMES_LIST, getGameById } from './games/registry';
 import { storage } from './services/storage';
 import { sounds } from './services/sound';
-import { GameMetadata, User } from './types';
 
-export const App: React.FC = () => {
-  const [currentUser, setCurrentUser] = useState<User>(() => storage.getCurrentUser());
-  const [activeGameId, setActiveGameId] = useState<string | null>(null);
+export const App = () => {
+  const [currentUser, setCurrentUser] = useState(() => storage.getCurrentUser());
+  const [activeGameId, setActiveGameId] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<string>('All');
+  const [selectedCategory, setSelectedCategory] = useState('All');
   
   // Modals
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isAddGuideOpen, setIsAddGuideOpen] = useState(false);
-  const [inspectedGame, setInspectedGame] = useState<GameMetadata | null>(null);
+  const [inspectedGame, setInspectedGame] = useState(null);
 
   const categories = ['All', 'Arcade', 'Strategy', 'Classic', 'Puzzle', 'Favorites'];
 
@@ -39,7 +38,7 @@ export const App: React.FC = () => {
     return game.category === selectedCategory;
   });
 
-  const handleLaunchGame = (gameId: string) => {
+  const handleLaunchGame = (gameId) => {
     sounds.playClick();
     setInspectedGame(null);
     setActiveGameId(gameId);
@@ -70,8 +69,7 @@ export const App: React.FC = () => {
           <div className="animate-in fade-in duration-200">
             {React.createElement(activeGame.component, {
               onBack: handleBackToStore,
-              onGameOver: (score: number) => {
-                // Refresh user state in case gamesPlayed incremented
+              onGameOver: (score) => {
                 setCurrentUser(storage.getCurrentUser());
               }
             })}
@@ -81,7 +79,6 @@ export const App: React.FC = () => {
           <div className="space-y-8 animate-in fade-in duration-300">
             {/* HERO PROMO BANNER */}
             <div className="relative rounded-3xl overflow-hidden p-6 sm:p-10 bg-gradient-to-r from-indigo-900/90 via-purple-900/80 to-slate-900/90 border border-indigo-500/30 shadow-2xl shadow-indigo-950/50">
-              {/* Background ambient lighting */}
               <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-500/20 rounded-full blur-3xl pointer-events-none" />
               <div className="absolute bottom-0 left-1/3 w-80 h-80 bg-pink-500/15 rounded-full blur-3xl pointer-events-none" />
 
@@ -99,7 +96,7 @@ export const App: React.FC = () => {
                 </h1>
 
                 <p className="mt-3 sm:mt-4 text-sm sm:text-base text-slate-300 leading-relaxed max-w-xl">
-                  Welcome to GameStack! Jump straight into retro classics like Flappy Bird and tactical XOX. All player profiles, leaderboards, and high scores stay 100% saved locally on this machine.
+                  Welcome to GameStack! Jump straight into retro classics like Flappy Bird, tactical XOX, multiplayer Snake & Ladder, Word Finder, and Retro Snake. All player profiles, leaderboards, and high scores stay 100% saved locally on this machine.
                 </p>
 
                 {/* Quick Launch Buttons */}
@@ -130,6 +127,13 @@ export const App: React.FC = () => {
                     className="px-5 py-3 rounded-2xl bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-400 hover:to-indigo-500 text-white font-bold text-xs sm:text-sm shadow-lg shadow-purple-500/25 active:scale-95 transition-all flex items-center gap-2"
                   >
                     <span>Play Word Finder</span>
+                  </button>
+
+                  <button
+                    onClick={() => handleLaunchGame('retro-snake')}
+                    className="px-5 py-3 rounded-2xl bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-400 hover:to-green-500 text-white font-bold text-xs sm:text-sm shadow-lg shadow-emerald-500/25 active:scale-95 transition-all flex items-center gap-2"
+                  >
+                    <span>Play Retro Snake</span>
                   </button>
 
                   <button
@@ -220,7 +224,7 @@ export const App: React.FC = () => {
                       Add More Games Soon
                     </h3>
                     <p className="text-xs text-slate-400 max-w-xs leading-relaxed mb-4">
-                      GameStack's modular registry is primed for your next games (Snake, 2048, Brick Breaker, etc.). Click to see how to drop them in!
+                      GameStack's modular registry is primed for your next games (2048, Pong, Brick Breaker, etc.). Click to see how to drop them in!
                     </p>
                     <span className="text-xs font-bold text-indigo-400 group-hover:text-indigo-300 flex items-center gap-1">
                       <span>View Developer Guide</span>

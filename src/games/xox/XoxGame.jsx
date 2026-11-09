@@ -4,31 +4,21 @@ import { ArrowLeft, RotateCcw, Volume2, VolumeX, User, Bot, Users, Trophy, Spark
 import { sounds } from '../../services/sound';
 import { storage } from '../../services/storage';
 
-interface XoxGameProps {
-  onGameOver?: (score: number) => void;
-  onBack?: () => void;
-}
-
-type Player = 'X' | 'O';
-type Board = (Player | null)[];
-type GameMode = 'ai' | 'pvp';
-type Difficulty = 'easy' | 'medium' | 'hard';
-
 const WINNING_COMBOS = [
   [0, 1, 2], [3, 4, 5], [6, 7, 8], // rows
   [0, 3, 6], [1, 4, 7], [2, 5, 8], // columns
   [0, 4, 8], [2, 4, 6]             // diagonals
 ];
 
-export const XoxGame: React.FC<XoxGameProps> = ({ onGameOver, onBack }) => {
-  const [board, setBoard] = useState<Board>(Array(9).fill(null));
-  const [isXNext, setIsXNext] = useState<boolean>(true);
-  const [gameMode, setGameMode] = useState<GameMode>('ai');
-  const [difficulty, setDifficulty] = useState<Difficulty>('medium');
-  const [winningLine, setWinningLine] = useState<number[] | null>(null);
-  const [winner, setWinner] = useState<Player | 'draw' | null>(null);
-  const [isAiThinking, setIsAiThinking] = useState<boolean>(false);
-  const [isMuted, setIsMuted] = useState<boolean>(() => sounds.getMuted());
+export const XoxGame = ({ onGameOver, onBack }) => {
+  const [board, setBoard] = useState(Array(9).fill(null));
+  const [isXNext, setIsXNext] = useState(true);
+  const [gameMode, setGameMode] = useState('ai');
+  const [difficulty, setDifficulty] = useState('medium');
+  const [winningLine, setWinningLine] = useState(null);
+  const [winner, setWinner] = useState(null);
+  const [isAiThinking, setIsAiThinking] = useState(false);
+  const [isMuted, setIsMuted] = useState(() => sounds.getMuted());
 
   // Score counters
   const [scores, setScores] = useState({
@@ -38,21 +28,21 @@ export const XoxGame: React.FC<XoxGameProps> = ({ onGameOver, onBack }) => {
     winStreak: 0
   });
 
-  const [bestStreak, setBestStreak] = useState<number>(() => storage.getHighScore('xox'));
+  const [bestStreak, setBestStreak] = useState(() => storage.getHighScore('xox'));
 
   const toggleMute = () => {
     const muted = sounds.toggleMute();
     setIsMuted(muted);
   };
 
-  const checkWinner = useCallback((currentBoard: Board): { winner: Player | 'draw' | null; line: number[] | null } => {
+  const checkWinner = useCallback((currentBoard) => {
     for (const [a, b, c] of WINNING_COMBOS) {
       if (
         currentBoard[a] &&
         currentBoard[a] === currentBoard[b] &&
         currentBoard[a] === currentBoard[c]
       ) {
-        return { winner: currentBoard[a] as Player, line: [a, b, c] };
+        return { winner: currentBoard[a], line: [a, b, c] };
       }
     }
     if (currentBoard.every(cell => cell !== null)) {
@@ -62,7 +52,7 @@ export const XoxGame: React.FC<XoxGameProps> = ({ onGameOver, onBack }) => {
   }, []);
 
   // Minimax Algorithm for Hard AI
-  const minimax = (tempBoard: Board, depth: number, isMaximizing: boolean): number => {
+  const minimax = (tempBoard, depth, isMaximizing) => {
     const res = checkWinner(tempBoard);
     if (res.winner === 'O') return 10 - depth;
     if (res.winner === 'X') return depth - 10;
@@ -70,7 +60,7 @@ export const XoxGame: React.FC<XoxGameProps> = ({ onGameOver, onBack }) => {
 
     const emptyIndices = tempBoard
       .map((val, idx) => (val === null ? idx : null))
-      .filter((idx): idx is number => idx !== null);
+      .filter((idx) => idx !== null);
 
     if (isMaximizing) {
       let maxEval = -Infinity;
@@ -94,10 +84,10 @@ export const XoxGame: React.FC<XoxGameProps> = ({ onGameOver, onBack }) => {
   };
 
   // Compute best move for AI
-  const getAiMove = useCallback((currentBoard: Board): number => {
+  const getAiMove = useCallback((currentBoard) => {
     const emptyIndices = currentBoard
       .map((val, idx) => (val === null ? idx : null))
-      .filter((idx): idx is number => idx !== null);
+      .filter((idx) => idx !== null);
 
     if (emptyIndices.length === 0) return -1;
 
@@ -107,25 +97,21 @@ export const XoxGame: React.FC<XoxGameProps> = ({ onGameOver, onBack }) => {
       return emptyIndices[randomIndex];
     }
 
-    // Medium: Win or block immediate threats, else random with slight intelligence
+    // Medium: Win or block immediate threats
     if (difficulty === 'medium') {
-      // 1. Check if AI can win on next move
       for (const idx of emptyIndices) {
         const copy = [...currentBoard];
         copy[idx] = 'O';
         if (checkWinner(copy).winner === 'O') return idx;
       }
-      // 2. Check if player X can win, block them
       for (const idx of emptyIndices) {
         const copy = [...currentBoard];
         copy[idx] = 'X';
         if (checkWinner(copy).winner === 'X') return idx;
       }
-      // 3. Take center if available (50% chance)
       if (currentBoard[4] === null && Math.random() > 0.3) {
         return 4;
       }
-      // 4. Random move
       const randomIndex = Math.floor(Math.random() * emptyIndices.length);
       return emptyIndices[randomIndex];
     }
@@ -148,7 +134,7 @@ export const XoxGame: React.FC<XoxGameProps> = ({ onGameOver, onBack }) => {
   }, [difficulty, checkWinner]);
 
   // Handle cell click
-  const handleCellClick = (index: number) => {
+  const handleCellClick = (index) => {
     if (board[index] || winner || (gameMode === 'ai' && !isXNext)) {
       return;
     }
@@ -195,7 +181,7 @@ export const XoxGame: React.FC<XoxGameProps> = ({ onGameOver, onBack }) => {
   }, [board, isXNext, gameMode, winner, getAiMove, checkWinner]);
 
   // End of game processing
-  const finalizeGame = (gameWinner: Player | 'draw', line: number[] | null, currentBoard: Board) => {
+  const finalizeGame = (gameWinner, line) => {
     setWinner(gameWinner);
     setWinningLine(line);
 
@@ -228,7 +214,6 @@ export const XoxGame: React.FC<XoxGameProps> = ({ onGameOver, onBack }) => {
           onGameOver(scores.winStreak + 1);
         }
       } else {
-        // 'O' won
         setScores(prev => ({
           ...prev,
           oWins: prev.oWins + 1,
@@ -317,12 +302,12 @@ export const XoxGame: React.FC<XoxGameProps> = ({ onGameOver, onBack }) => {
           </button>
         </div>
 
-        {/* AI Difficulty Selector (if AI mode) */}
+        {/* AI Difficulty Selector */}
         {gameMode === 'ai' && (
           <div className="flex items-center justify-between text-xs mb-4 px-1">
             <span className="text-slate-400 font-medium">Bot Difficulty:</span>
             <div className="flex gap-1.5">
-              {(['easy', 'medium', 'hard'] as Difficulty[]).map(lvl => (
+              {['easy', 'medium', 'hard'].map(lvl => (
                 <button
                   key={lvl}
                   onClick={() => {

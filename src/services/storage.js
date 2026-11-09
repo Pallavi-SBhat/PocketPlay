@@ -1,5 +1,3 @@
-import { User, GameScoreRecord } from '../types';
-
 const STORAGE_KEYS = {
   USERS: 'gamestack_users',
   CURRENT_USER: 'gamestack_current_user',
@@ -13,7 +11,7 @@ export const AVATAR_OPTIONS = [
 ];
 
 class StorageService {
-  private get<T>(key: string, defaultValue: T): T {
+  get(key, defaultValue) {
     try {
       const data = localStorage.getItem(key);
       return data ? JSON.parse(data) : defaultValue;
@@ -22,7 +20,7 @@ class StorageService {
     }
   }
 
-  private set<T>(key: string, value: T): void {
+  set(key, value) {
     try {
       localStorage.setItem(key, JSON.stringify(value));
     } catch (e) {
@@ -31,11 +29,11 @@ class StorageService {
   }
 
   // Auth & User Management
-  public getUsers(): User[] {
-    return this.get<User[]>(STORAGE_KEYS.USERS, []);
+  getUsers() {
+    return this.get(STORAGE_KEYS.USERS, []);
   }
 
-  public register(username: string, email: string, avatar: string = '🎮'): { success: boolean; message: string; user?: User } {
+  register(username, email, avatar = '🎮') {
     const trimmedUsername = username.trim();
     if (!trimmedUsername) {
       return { success: false, message: 'Username cannot be empty' };
@@ -47,7 +45,7 @@ class StorageService {
       return { success: false, message: 'Username already taken. Please choose another.' };
     }
 
-    const newUser: User = {
+    const newUser = {
       id: 'usr_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7),
       username: trimmedUsername,
       email: email.trim() || `${trimmedUsername.toLowerCase()}@offline.arcade`,
@@ -64,7 +62,7 @@ class StorageService {
     return { success: true, message: 'Registration successful! Welcome to GameStack.', user: newUser };
   }
 
-  public login(username: string): { success: boolean; message: string; user?: User } {
+  login(username) {
     const trimmedUsername = username.trim();
     if (!trimmedUsername) {
       return { success: false, message: 'Please enter your username' };
@@ -81,12 +79,12 @@ class StorageService {
     return { success: true, message: `Welcome back, ${user.username}!`, user };
   }
 
-  public getCurrentUser(): User {
-    const current = this.get<User | null>(STORAGE_KEYS.CURRENT_USER, null);
+  getCurrentUser() {
+    const current = this.get(STORAGE_KEYS.CURRENT_USER, null);
     if (current) return current;
 
     // Default guest user
-    const guestUser: User = {
+    const guestUser = {
       id: 'guest_player',
       username: 'Player One',
       email: 'player@offline.arcade',
@@ -100,12 +98,12 @@ class StorageService {
     return guestUser;
   }
 
-  public setCurrentUser(user: User): void {
+  setCurrentUser(user) {
     this.set(STORAGE_KEYS.CURRENT_USER, user);
   }
 
-  public logout(): void {
-    const guestUser: User = {
+  logout() {
+    const guestUser = {
       id: 'guest_player',
       username: 'Player One',
       email: 'player@offline.arcade',
@@ -117,7 +115,7 @@ class StorageService {
     this.setCurrentUser(guestUser);
   }
 
-  public updateProfile(avatar: string, username?: string): User {
+  updateProfile(avatar, username) {
     const currentUser = this.getCurrentUser();
     currentUser.avatar = avatar;
     if (username && username.trim()) {
@@ -138,12 +136,12 @@ class StorageService {
   }
 
   // High Scores & Game Records
-  public recordScore(gameId: string, score: number, metadata?: string): GameScoreRecord {
+  recordScore(gameId, score, metadata) {
     const currentUser = this.getCurrentUser();
     currentUser.gamesPlayed = (currentUser.gamesPlayed || 0) + 1;
     this.setCurrentUser(currentUser);
 
-    const record: GameScoreRecord = {
+    const record = {
       gameId,
       score,
       date: new Date().toISOString(),
@@ -152,7 +150,7 @@ class StorageService {
       metadata
     };
 
-    const scores = this.get<GameScoreRecord[]>(STORAGE_KEYS.SCORES, []);
+    const scores = this.get(STORAGE_KEYS.SCORES, []);
     scores.unshift(record);
     // Keep last 100 records
     this.set(STORAGE_KEYS.SCORES, scores.slice(0, 100));
@@ -160,21 +158,21 @@ class StorageService {
     return record;
   }
 
-  public getHighScore(gameId: string): number {
-    const scores = this.get<GameScoreRecord[]>(STORAGE_KEYS.SCORES, []);
+  getHighScore(gameId) {
+    const scores = this.get(STORAGE_KEYS.SCORES, []);
     const gameScores = scores.filter(s => s.gameId === gameId).map(s => s.score);
     return gameScores.length > 0 ? Math.max(...gameScores) : 0;
   }
 
-  public getUserHighScore(gameId: string, userId?: string): number {
+  getUserHighScore(gameId, userId) {
     const uid = userId || this.getCurrentUser().id;
-    const scores = this.get<GameScoreRecord[]>(STORAGE_KEYS.SCORES, []);
+    const scores = this.get(STORAGE_KEYS.SCORES, []);
     const userScores = scores.filter(s => s.gameId === gameId && s.userId === uid).map(s => s.score);
     return userScores.length > 0 ? Math.max(...userScores) : 0;
   }
 
-  public getLeaderboard(gameId: string, limit: number = 5): GameScoreRecord[] {
-    const scores = this.get<GameScoreRecord[]>(STORAGE_KEYS.SCORES, []);
+  getLeaderboard(gameId, limit = 5) {
+    const scores = this.get(STORAGE_KEYS.SCORES, []);
     return scores
       .filter(s => s.gameId === gameId)
       .sort((a, b) => b.score - a.score)
@@ -182,7 +180,7 @@ class StorageService {
   }
 
   // Favorites
-  public toggleFavorite(gameId: string): boolean {
+  toggleFavorite(gameId) {
     const currentUser = this.getCurrentUser();
     const favs = new Set(currentUser.favorites || []);
     let isFav = false;
@@ -208,25 +206,25 @@ class StorageService {
     return isFav;
   }
 
-  public isFavorite(gameId: string): boolean {
+  isFavorite(gameId) {
     const currentUser = this.getCurrentUser();
     return (currentUser.favorites || []).includes(gameId);
   }
 
   // Word Finder 1000-Level System
-  public getWordFinderUnlockedLevel(): number {
-    return this.get<number>('gamestack_wordfinder_unlocked', 1);
+  getWordFinderUnlockedLevel() {
+    return this.get('gamestack_wordfinder_unlocked', 1);
   }
 
-  public getWordFinderStarsMap(): Record<number, number> {
-    return this.get<Record<number, number>>('gamestack_wordfinder_stars', {});
+  getWordFinderStarsMap() {
+    return this.get('gamestack_wordfinder_stars', {});
   }
 
-  public getWordFinderHints(): number {
-    return this.get<number>('gamestack_wordfinder_hints', 5);
+  getWordFinderHints() {
+    return this.get('gamestack_wordfinder_hints', 5);
   }
 
-  public useWordFinderHint(): boolean {
+  useWordFinderHint() {
     const hints = this.getWordFinderHints();
     if (hints > 0) {
       this.set('gamestack_wordfinder_hints', hints - 1);
@@ -235,13 +233,13 @@ class StorageService {
     return false;
   }
 
-  public addWordFinderHints(count: number): number {
+  addWordFinderHints(count) {
     const hints = this.getWordFinderHints() + count;
     this.set('gamestack_wordfinder_hints', hints);
     return hints;
   }
 
-  public saveWordFinderLevelComplete(level: number, stars: number, wordsFoundCount: number): { isNewLevel: boolean; newUnlocked: number } {
+  saveWordFinderLevelComplete(level, stars, wordsFoundCount) {
     const unlocked = this.getWordFinderUnlockedLevel();
     const nextUnlocked = Math.max(unlocked, Math.min(1000, level + 1));
     const isNew = nextUnlocked > unlocked;
@@ -254,7 +252,7 @@ class StorageService {
     this.set('gamestack_wordfinder_stars', starsMap);
 
     // Track total words found
-    const totalWords = this.get<number>('gamestack_wordfinder_total_words', 0) + wordsFoundCount;
+    const totalWords = this.get('gamestack_wordfinder_total_words', 0) + wordsFoundCount;
     this.set('gamestack_wordfinder_total_words', totalWords);
 
     // Grant 1 free hint every 3 levels
@@ -268,12 +266,12 @@ class StorageService {
     return { isNewLevel: isNew, newUnlocked: nextUnlocked };
   }
 
-  public getWordFinderStats() {
+  getWordFinderStats() {
     const unlocked = this.getWordFinderUnlockedLevel();
     const starsMap = this.getWordFinderStarsMap();
     const totalStars = Object.values(starsMap).reduce((sum, s) => sum + s, 0);
     const hints = this.getWordFinderHints();
-    const totalWords = this.get<number>('gamestack_wordfinder_total_words', 0);
+    const totalWords = this.get('gamestack_wordfinder_total_words', 0);
 
     return {
       unlockedLevel: unlocked,

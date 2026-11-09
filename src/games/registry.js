@@ -1,11 +1,10 @@
-import React from 'react';
-import { GameMetadata } from '../types';
 import { FlappyBirdGame } from './flappy-bird/FlappyBirdGame';
 import { XoxGame } from './xox/XoxGame';
 import { SnakeAndLadderGame } from './snake-and-ladder/SnakeAndLadderGame';
 import { WordFinderGame } from './word-finder/WordFinderGame';
+import { SnakeGame } from './snake/SnakeGame';
 
-export const GAMES_LIST: GameMetadata[] = [
+export const GAMES_LIST = [
   {
     id: 'flappy-bird',
     title: 'Flappy Bird Neon',
@@ -95,10 +94,34 @@ export const GAMES_LIST: GameMetadata[] = [
       { key: 'Hint Button (💡)', action: 'Reveal starting square of an unfound word' }
     ],
     component: WordFinderGame
+  },
+  {
+    id: 'retro-snake',
+    title: 'Retro Neon Snake',
+    tagline: 'Classic arcade snake with juicy neon graphics, golden food & portal wraps!',
+    description: 'The definitive offline arcade snake experience! Slither through a sleek neon cyber grid, munch on delicious glowing apples, grab golden bonus stars, and test your speed across 3 difficulty tiers. Switch between classic deadly borders or portal wrap-around mode!',
+    category: 'Arcade',
+    tags: ['Retro', 'Snake', 'Classic', 'Reflex'],
+    thumbnail: 'https://images.unsplash.com/photo-1628277613967-6abca504d0ac?auto=format&fit=crop&w=600&q=80',
+    badge: 'Arcade Classic',
+    accentColor: '#10b981',
+    instructions: [
+      'Use Arrow keys or WASD (or on-screen touch buttons) to direct your snake.',
+      'Eat red glowing apples to grow longer and score +10 points.',
+      'Catch rare Golden Stars before the timer expires for a massive +50 point bonus!',
+      'Avoid running into your own tail or crashing into borders (in Deadly Walls mode).',
+      'Toggle Portal mode to smoothly wrap around from one side of the screen to the other!'
+    ],
+    controls: [
+      { key: 'Arrow Keys / WASD', action: 'Steer snake direction' },
+      { key: 'Space / P', action: 'Pause / Resume game' },
+      { key: 'R', action: 'Quick restart' }
+    ],
+    component: SnakeGame
   }
 ];
 
-export function getGameById(id: string): GameMetadata | undefined {
+export function getGameById(id) {
   return GAMES_LIST.find(game => game.id === id);
 }
 

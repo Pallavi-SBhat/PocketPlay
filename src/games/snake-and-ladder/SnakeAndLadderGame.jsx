@@ -1,31 +1,14 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import confetti from 'canvas-confetti';
 import { 
   ArrowLeft, RotateCcw, Volume2, VolumeX, Trophy, Users, 
-  Sparkles, Bot, Play, UserPlus, Dices, ChevronRight, Award, ShieldAlert
+  Bot, Play, Dices
 } from 'lucide-react';
 import { sounds } from '../../services/sound';
 import { storage } from '../../services/storage';
 
-interface SnakeAndLadderProps {
-  onGameOver?: (score: number) => void;
-  onBack?: () => void;
-}
-
-export interface PlayerConfig {
-  id: number;
-  name: string;
-  avatar: string;
-  color: string;
-  bgClass: string;
-  borderClass: string;
-  ringClass: string;
-  isBot: boolean;
-  position: number; // 1 to 100
-}
-
 // Ladders: Start -> End (climb up)
-export const LADDERS: Record<number, number> = {
+export const LADDERS = {
   4: 14,
   9: 31,
   20: 38,
@@ -37,7 +20,7 @@ export const LADDERS: Record<number, number> = {
 };
 
 // Snakes: Start -> End (slide down)
-export const SNAKES: Record<number, number> = {
+export const SNAKES = {
   17: 7,
   54: 34,
   62: 19,
@@ -56,7 +39,7 @@ const PLAYER_THEMES = [
   { color: '#f59e0b', bgClass: 'bg-amber-500', borderClass: 'border-amber-400', ringClass: 'ring-amber-500' }
 ];
 
-export function getSquareCoords(square: number): { row: number; col: number; x: number; y: number } {
+export function getSquareCoords(square) {
   const index = Math.max(1, Math.min(100, square)) - 1;
   const rowFromBottom = Math.floor(index / 10);
   const colInRow = index % 10;
@@ -70,24 +53,24 @@ export function getSquareCoords(square: number): { row: number; col: number; x: 
   };
 }
 
-export const SnakeAndLadderGame: React.FC<SnakeAndLadderProps> = ({ onGameOver, onBack }) => {
+export const SnakeAndLadderGame = ({ onGameOver, onBack }) => {
   // Game Setup States
-  const [isConfiguring, setIsConfiguring] = useState<boolean>(true);
-  const [numPlayers, setNumPlayers] = useState<number>(2);
-  const [players, setPlayers] = useState<PlayerConfig[]>([
+  const [isConfiguring, setIsConfiguring] = useState(true);
+  const [numPlayers, setNumPlayers] = useState(2);
+  const [players, setPlayers] = useState([
     { id: 1, name: 'Player 1', avatar: '🦁', color: PLAYER_THEMES[0].color, bgClass: PLAYER_THEMES[0].bgClass, borderClass: PLAYER_THEMES[0].borderClass, ringClass: PLAYER_THEMES[0].ringClass, isBot: false, position: 1 },
     { id: 2, name: 'Player 2', avatar: '🦊', color: PLAYER_THEMES[1].color, bgClass: PLAYER_THEMES[1].bgClass, borderClass: PLAYER_THEMES[1].borderClass, ringClass: PLAYER_THEMES[1].ringClass, isBot: false, position: 1 }
   ]);
 
   // Active Play States
-  const [currentTurnIdx, setCurrentTurnIdx] = useState<number>(0);
-  const [diceValue, setDiceValue] = useState<number>(1);
-  const [isRolling, setIsRolling] = useState<boolean>(false);
-  const [isMoving, setIsMoving] = useState<boolean>(false);
-  const [winner, setWinner] = useState<PlayerConfig | null>(null);
-  const [isMuted, setIsMuted] = useState<boolean>(() => sounds.getMuted());
-  const [gameLog, setGameLog] = useState<{ id: string; text: string; type: 'normal' | 'ladder' | 'snake' | 'win' | 'six' }[]>([]);
-  const [turnMessage, setTurnMessage] = useState<string>('Roll the dice to start!');
+  const [currentTurnIdx, setCurrentTurnIdx] = useState(0);
+  const [diceValue, setDiceValue] = useState(1);
+  const [isRolling, setIsRolling] = useState(false);
+  const [isMoving, setIsMoving] = useState(false);
+  const [winner, setWinner] = useState(null);
+  const [isMuted, setIsMuted] = useState(() => sounds.getMuted());
+  const [gameLog, setGameLog] = useState([]);
+  const [turnMessage, setTurnMessage] = useState('Roll the dice to start!');
 
   const isCurrentBot = players[currentTurnIdx]?.isBot && !winner && !isConfiguring;
 
@@ -96,10 +79,9 @@ export const SnakeAndLadderGame: React.FC<SnakeAndLadderProps> = ({ onGameOver, 
     setIsMuted(next);
   };
 
-  // Adjust number of players in configuration
-  const handleNumPlayersChange = (count: number) => {
+  const handleNumPlayersChange = (count) => {
     setNumPlayers(count);
-    const newPlayers: PlayerConfig[] = [];
+    const newPlayers = [];
     for (let i = 0; i < count; i++) {
       newPlayers.push({
         id: i + 1,
@@ -116,7 +98,7 @@ export const SnakeAndLadderGame: React.FC<SnakeAndLadderProps> = ({ onGameOver, 
     setPlayers(newPlayers);
   };
 
-  const updatePlayer = (idx: number, updates: Partial<PlayerConfig>) => {
+  const updatePlayer = (idx, updates) => {
     setPlayers(prev => {
       const copy = [...prev];
       copy[idx] = { ...copy[idx], ...updates };
@@ -145,8 +127,7 @@ export const SnakeAndLadderGame: React.FC<SnakeAndLadderProps> = ({ onGameOver, 
     setGameLog([]);
   };
 
-  // Step-by-step token movement
-  const movePlayerStepByStep = useCallback(async (playerIdx: number, roll: number) => {
+  const movePlayerStepByStep = useCallback(async (playerIdx, roll) => {
     setIsMoving(true);
     const player = players[playerIdx];
     let currentPos = player.position;
@@ -162,7 +143,6 @@ export const SnakeAndLadderGame: React.FC<SnakeAndLadderProps> = ({ onGameOver, 
       ]);
     }
 
-    // Step-by-step animation
     const stepCount = Math.abs(targetPos - currentPos);
     const direction = targetPos >= currentPos ? 1 : -1;
 
@@ -241,7 +221,6 @@ export const SnakeAndLadderGame: React.FC<SnakeAndLadderProps> = ({ onGameOver, 
       ]);
       setIsMoving(false);
     } else {
-      // Pass turn to next player
       const nextTurn = (playerIdx + 1) % players.length;
       setCurrentTurnIdx(nextTurn);
       setTurnMessage(`${players[nextTurn].name}'s turn to roll!`);
@@ -249,14 +228,12 @@ export const SnakeAndLadderGame: React.FC<SnakeAndLadderProps> = ({ onGameOver, 
     }
   }, [players, onGameOver]);
 
-  // Dice Roll Handler
   const handleRollDice = useCallback(() => {
     if (isRolling || isMoving || winner) return;
 
     setIsRolling(true);
     sounds.playDiceRoll();
 
-    // Dice animation frames
     let rollTicks = 0;
     const interval = setInterval(() => {
       const tempRoll = Math.floor(Math.random() * 6) + 1;
@@ -273,7 +250,6 @@ export const SnakeAndLadderGame: React.FC<SnakeAndLadderProps> = ({ onGameOver, 
     }, 60);
   }, [isRolling, isMoving, winner, currentTurnIdx, movePlayerStepByStep]);
 
-  // Automatic roll for Computer Bot
   useEffect(() => {
     if (isCurrentBot && !isRolling && !isMoving && !winner) {
       const botTimer = setTimeout(() => {
@@ -283,18 +259,15 @@ export const SnakeAndLadderGame: React.FC<SnakeAndLadderProps> = ({ onGameOver, 
     }
   }, [isCurrentBot, isRolling, isMoving, winner, handleRollDice]);
 
-  // Render SVG connecting lines for Ladders and Snakes
   const renderBoardConnections = () => {
     return (
       <svg className="absolute inset-0 w-full h-full pointer-events-none z-10" viewBox="0 0 100 100" preserveAspectRatio="none">
         <defs>
-          {/* Ladder Gradient */}
           <linearGradient id="ladderGrad" x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stopColor="#38bdf8" />
             <stop offset="100%" stopColor="#0284c7" />
           </linearGradient>
 
-          {/* Snake Gradient */}
           <linearGradient id="snakeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stopColor="#ef4444" />
             <stop offset="50%" stopColor="#f97316" />
@@ -308,7 +281,6 @@ export const SnakeAndLadderGame: React.FC<SnakeAndLadderProps> = ({ onGameOver, 
           const p1 = getSquareCoords(start);
           const p2 = getSquareCoords(end);
 
-          // Vector math for parallel ladder rails
           const dx = p2.x - p1.x;
           const dy = p2.y - p1.y;
           const len = Math.sqrt(dx * dx + dy * dy);
@@ -338,7 +310,6 @@ export const SnakeAndLadderGame: React.FC<SnakeAndLadderProps> = ({ onGameOver, 
 
           return (
             <g key={`ladder-${start}`}>
-              {/* Left Rail */}
               <line
                 x1={p1.x - nx}
                 y1={p1.y - ny}
@@ -349,7 +320,6 @@ export const SnakeAndLadderGame: React.FC<SnakeAndLadderProps> = ({ onGameOver, 
                 strokeLinecap="round"
                 opacity="0.85"
               />
-              {/* Right Rail */}
               <line
                 x1={p1.x + nx}
                 y1={p1.y + ny}
@@ -360,19 +330,17 @@ export const SnakeAndLadderGame: React.FC<SnakeAndLadderProps> = ({ onGameOver, 
                 strokeLinecap="round"
                 opacity="0.85"
               />
-              {/* Rungs */}
               {rungs}
             </g>
           );
         })}
 
-        {/* Draw Snakes (Smooth Bézier Curves) */}
+        {/* Draw Snakes */}
         {Object.entries(SNAKES).map(([headStr, tail]) => {
           const head = Number(headStr);
-          const p1 = getSquareCoords(head); // Snake Head
-          const p2 = getSquareCoords(tail); // Snake Tail
+          const p1 = getSquareCoords(head);
+          const p2 = getSquareCoords(tail);
 
-          // Control point for a wavy snake curve
           const midX = (p1.x + p2.x) / 2;
           const midY = (p1.y + p2.y) / 2;
           const offset = ((head % 2 === 0 ? 1 : -1) * 7);
@@ -381,7 +349,6 @@ export const SnakeAndLadderGame: React.FC<SnakeAndLadderProps> = ({ onGameOver, 
 
           return (
             <g key={`snake-${head}`}>
-              {/* Snake Body Shadow */}
               <path
                 d={`M ${p1.x} ${p1.y} Q ${cp1x} ${cp1y} ${p2.x} ${p2.y}`}
                 fill="none"
@@ -389,7 +356,6 @@ export const SnakeAndLadderGame: React.FC<SnakeAndLadderProps> = ({ onGameOver, 
                 strokeWidth="2.5"
                 strokeLinecap="round"
               />
-              {/* Snake Body Glowing Spine */}
               <path
                 d={`M ${p1.x} ${p1.y} Q ${cp1x} ${cp1y} ${p2.x} ${p2.y}`}
                 fill="none"
@@ -398,10 +364,8 @@ export const SnakeAndLadderGame: React.FC<SnakeAndLadderProps> = ({ onGameOver, 
                 strokeDasharray="2 1.2"
                 strokeLinecap="round"
               />
-              {/* Snake Head Marker */}
               <circle cx={p1.x} cy={p1.y} r="2.2" fill="#ef4444" stroke="#ffffff" strokeWidth="0.6" />
               <circle cx={p1.x} cy={p1.y} r="1" fill="#7f1d1d" />
-              {/* Snake Tail Marker */}
               <circle cx={p2.x} cy={p2.y} r="1.2" fill="#f97316" />
             </g>
           );
@@ -410,8 +374,7 @@ export const SnakeAndLadderGame: React.FC<SnakeAndLadderProps> = ({ onGameOver, 
     );
   };
 
-  // Dots layout for dice face
-  const renderDiceDots = (val: number) => {
+  const renderDiceDots = (val) => {
     switch (val) {
       case 1:
         return <div className="w-3.5 h-3.5 bg-rose-500 rounded-full shadow-inner" />;
@@ -502,7 +465,7 @@ export const SnakeAndLadderGame: React.FC<SnakeAndLadderProps> = ({ onGameOver, 
         </div>
       </div>
 
-      {/* 1. MATCH CONFIGURATION VIEW (Choose Players & Avatars) */}
+      {/* 1. MATCH CONFIGURATION VIEW */}
       {isConfiguring ? (
         <div className="w-full max-w-xl bg-slate-900/90 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl backdrop-blur-md animate-in fade-in duration-200">
           <div className="text-center mb-6">
@@ -545,7 +508,6 @@ export const SnakeAndLadderGame: React.FC<SnakeAndLadderProps> = ({ onGameOver, 
                 key={p.id}
                 className="p-3.5 rounded-2xl bg-slate-800/40 border border-slate-700/60 flex items-center gap-3"
               >
-                {/* Avatar Cycle Button */}
                 <button
                   type="button"
                   title="Click to cycle avatar"
@@ -559,7 +521,6 @@ export const SnakeAndLadderGame: React.FC<SnakeAndLadderProps> = ({ onGameOver, 
                   {p.avatar}
                 </button>
 
-                {/* Player Name Input */}
                 <div className="flex-1">
                   <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-0.5">
                     Player {idx + 1}
@@ -573,7 +534,6 @@ export const SnakeAndLadderGame: React.FC<SnakeAndLadderProps> = ({ onGameOver, 
                   />
                 </div>
 
-                {/* Human vs Computer Bot Toggle */}
                 <button
                   type="button"
                   onClick={() => updatePlayer(idx, { isBot: !p.isBot })}
@@ -602,18 +562,12 @@ export const SnakeAndLadderGame: React.FC<SnakeAndLadderProps> = ({ onGameOver, 
       ) : (
         /* 2. ACTIVE SNAKE AND LADDER BOARD VIEW */
         <div className="w-full max-w-4xl grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-          {/* Left/Main Column: 10x10 Game Board */}
           <div className="lg:col-span-8 flex flex-col items-center">
-            {/* Board Frame */}
             <div className="relative w-full aspect-square max-w-[500px] bg-slate-950 rounded-3xl p-3 border-4 border-indigo-500/30 shadow-2xl overflow-hidden">
-              {/* SVG Overlay for drawing Ladders and Snakes */}
               {renderBoardConnections()}
 
-              {/* 10x10 Grid */}
               <div className="grid grid-cols-10 grid-rows-10 w-full h-full gap-1 relative z-0">
                 {Array.from({ length: 100 }, (_, i) => {
-                  const squareNumber = 100 - i;
-                  // Map display square based on boustrophedon
                   const rowFromTop = Math.floor(i / 10);
                   const colInGrid = i % 10;
                   const rowFromBottom = 9 - rowFromTop;
@@ -623,11 +577,7 @@ export const SnakeAndLadderGame: React.FC<SnakeAndLadderProps> = ({ onGameOver, 
                       : rowFromBottom * 10 + (10 - colInGrid);
 
                   const isLadderStart = LADDERS[actualSquare] !== undefined;
-                  const isLadderEnd = Object.values(LADDERS).includes(actualSquare);
                   const isSnakeHead = SNAKES[actualSquare] !== undefined;
-                  const isSnakeTail = Object.values(SNAKES).includes(actualSquare);
-
-                  // Players on this square
                   const playersHere = players.filter(p => p.position === actualSquare);
 
                   return (
@@ -647,7 +597,6 @@ export const SnakeAndLadderGame: React.FC<SnakeAndLadderProps> = ({ onGameOver, 
                           : 'bg-slate-800/50 border-slate-700/60 text-slate-300'
                       }`}
                     >
-                      {/* Square Number & Indicator Badges */}
                       <div className="flex items-center justify-between leading-none">
                         <span className="font-mono">{actualSquare}</span>
                         {actualSquare === 100 && <span>🏆</span>}
@@ -664,7 +613,6 @@ export const SnakeAndLadderGame: React.FC<SnakeAndLadderProps> = ({ onGameOver, 
                         )}
                       </div>
 
-                      {/* Token Container for Players on this tile */}
                       <div className="flex flex-wrap items-center justify-center gap-0.5 mt-auto">
                         {playersHere.map(p => (
                           <div
@@ -682,14 +630,12 @@ export const SnakeAndLadderGame: React.FC<SnakeAndLadderProps> = ({ onGameOver, 
               </div>
             </div>
 
-            {/* Turn status ticker */}
             <div className="w-full max-w-[500px] mt-3 px-4 py-2.5 rounded-2xl bg-slate-900/80 border border-slate-800 text-xs font-semibold text-center text-slate-200 flex items-center justify-center gap-2">
               <span className="text-base">{players[currentTurnIdx]?.avatar}</span>
               <span>{turnMessage}</span>
             </div>
           </div>
 
-          {/* Right Column: Dice Roller, Players Leaderboard & Match Logs */}
           <div className="lg:col-span-4 space-y-4">
             {/* DICE ROLLING PANEL */}
             <div className="p-5 rounded-3xl bg-slate-900/90 border border-slate-800 shadow-xl flex flex-col items-center text-center">
@@ -697,7 +643,6 @@ export const SnakeAndLadderGame: React.FC<SnakeAndLadderProps> = ({ onGameOver, 
                 Current Turn: <strong className="text-white">{players[currentTurnIdx]?.name}</strong>
               </div>
 
-              {/* 3D-styled Animated Dice */}
               <div className="relative my-2">
                 <div
                   className={`w-20 h-20 rounded-2xl bg-white border-2 border-slate-300 shadow-2xl flex items-center justify-center transition-all transform ${
@@ -707,14 +652,12 @@ export const SnakeAndLadderGame: React.FC<SnakeAndLadderProps> = ({ onGameOver, 
                   {renderDiceDots(diceValue)}
                 </div>
 
-                {/* Roll glow */}
                 <div
                   className="absolute inset-0 rounded-2xl blur-lg pointer-events-none opacity-40"
                   style={{ backgroundColor: players[currentTurnIdx]?.color }}
                 />
               </div>
 
-              {/* Roll Dice Button */}
               <button
                 onClick={handleRollDice}
                 disabled={isRolling || isMoving || winner !== null || isCurrentBot}

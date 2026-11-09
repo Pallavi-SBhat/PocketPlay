@@ -2,57 +2,45 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import confetti from 'canvas-confetti';
 import { 
   ArrowLeft, RotateCcw, Volume2, VolumeX, Lightbulb, Trophy, 
-  Sparkles, Grid, ChevronRight, ChevronLeft, Check, Lock, Star, Play, Search
+  Grid, ChevronRight, Check, Lock, Play, Search
 } from 'lucide-react';
 import { sounds } from '../../services/sound';
 import { storage } from '../../services/storage';
-import { generateLevel, LevelData, GeneratedWord } from './wordData';
+import { generateLevel } from './wordData';
 
-interface WordFinderProps {
-  onGameOver?: (score: number) => void;
-  onBack?: () => void;
-}
-
-interface Point {
-  row: number;
-  col: number;
-}
-
-export const WordFinderGame: React.FC<WordFinderProps> = ({ onGameOver, onBack }) => {
-  // Current game level
-  const [currentLevel, setCurrentLevel] = useState<number>(() => {
+export const WordFinderGame = ({ onGameOver, onBack }) => {
+  const [currentLevel, setCurrentLevel] = useState(() => {
     return storage.getWordFinderUnlockedLevel();
   });
 
-  const [levelData, setLevelData] = useState<LevelData>(() => generateLevel(currentLevel));
-  const [foundWords, setFoundWords] = useState<string[]>([]);
-  const [selectedCells, setSelectedCells] = useState<Point[]>([]);
-  const [isSelecting, setIsSelecting] = useState<boolean>(false);
-  const [selectionStart, setSelectionStart] = useState<Point | null>(null);
+  const [levelData, setLevelData] = useState(() => generateLevel(currentLevel));
+  const [foundWords, setFoundWords] = useState([]);
+  const [selectedCells, setSelectedCells] = useState([]);
+  const [isSelecting, setIsSelecting] = useState(false);
+  const [selectionStart, setSelectionStart] = useState(null);
 
   // Hints & Timer
-  const [hintsAvailable, setHintsAvailable] = useState<number>(() => storage.getWordFinderHints());
-  const [hintedWord, setHintedWord] = useState<GeneratedWord | null>(null);
-  const [secondsElapsed, setSecondsElapsed] = useState<number>(0);
-  const [isTimerRunning, setIsTimerRunning] = useState<boolean>(true);
+  const [hintsAvailable, setHintsAvailable] = useState(() => storage.getWordFinderHints());
+  const [hintedWord, setHintedWord] = useState(null);
+  const [secondsElapsed, setSecondsElapsed] = useState(0);
+  const [isTimerRunning, setIsTimerRunning] = useState(true);
 
   // Modals & UI States
-  const [isLevelSelectorOpen, setIsLevelSelectorOpen] = useState<boolean>(false);
-  const [isLevelComplete, setIsLevelComplete] = useState<boolean>(false);
-  const [levelStars, setLevelStars] = useState<number>(3);
-  const [isMuted, setIsMuted] = useState<boolean>(() => sounds.getMuted());
-  const [selectorChapter, setSelectorChapter] = useState<number>(0); // 0 to 9 (each chapter has 100 levels)
-  const [jumpInput, setJumpInput] = useState<string>('');
+  const [isLevelSelectorOpen, setIsLevelSelectorOpen] = useState(false);
+  const [isLevelComplete, setIsLevelComplete] = useState(false);
+  const [levelStars, setLevelStars] = useState(3);
+  const [isMuted, setIsMuted] = useState(() => sounds.getMuted());
+  const [selectorChapter, setSelectorChapter] = useState(0);
+  const [jumpInput, setJumpInput] = useState('');
 
-  const gridRef = useRef<HTMLDivElement | null>(null);
+  const gridRef = useRef(null);
 
   const toggleMute = () => {
     const next = sounds.toggleMute();
     setIsMuted(next);
   };
 
-  // Load or change level
-  const loadLevel = useCallback((lvl: number) => {
+  const loadLevel = useCallback((lvl) => {
     const validLevel = Math.max(1, Math.min(1000, lvl));
     setCurrentLevel(validLevel);
     setLevelData(generateLevel(validLevel));
@@ -66,7 +54,6 @@ export const WordFinderGame: React.FC<WordFinderProps> = ({ onGameOver, onBack }
     setIsLevelSelectorOpen(false);
   }, []);
 
-  // Timer Effect
   useEffect(() => {
     if (!isTimerRunning || isLevelComplete) return;
     const interval = setInterval(() => {
@@ -75,25 +62,23 @@ export const WordFinderGame: React.FC<WordFinderProps> = ({ onGameOver, onBack }
     return () => clearInterval(interval);
   }, [isTimerRunning, isLevelComplete]);
 
-  // Compute straight-line path between two points
-  const getLinePath = (p1: Point, p2: Point): Point[] => {
+  const getLinePath = (p1, p2) => {
     const dRow = p2.row - p1.row;
     const dCol = p2.col - p1.col;
 
-    // Check if straight horizontal, vertical, or diagonal (45 deg)
     const isHorizontal = dRow === 0;
     const isVertical = dCol === 0;
     const isDiagonal = Math.abs(dRow) === Math.abs(dCol);
 
     if (!isHorizontal && !isVertical && !isDiagonal) {
-      return [p1]; // invalid direction
+      return [p1];
     }
 
     const stepRow = dRow === 0 ? 0 : dRow > 0 ? 1 : -1;
     const stepCol = dCol === 0 ? 0 : dCol > 0 ? 1 : -1;
     const steps = Math.max(Math.abs(dRow), Math.abs(dCol));
 
-    const path: Point[] = [];
+    const path = [];
     for (let i = 0; i <= steps; i++) {
       path.push({
         row: p1.row + stepRow * i,
@@ -103,14 +88,11 @@ export const WordFinderGame: React.FC<WordFinderProps> = ({ onGameOver, onBack }
     return path;
   };
 
-  // Get word formed by selected cells
-  const getSelectedString = (cells: Point[]): string => {
+  const getSelectedString = (cells) => {
     return cells.map(pt => levelData.grid[pt.row][pt.col]).join('');
   };
 
-  // Touch and Mouse Event Handlers for Selection
-  const handleCellMouseDown = (row: number, col: number) => {
-    // If click-to-select mode: if already have start, this clicks end
+  const handleCellMouseDown = (row, col) => {
     if (selectionStart && (selectionStart.row !== row || selectionStart.col !== col)) {
       const path = getLinePath(selectionStart, { row, col });
       setSelectedCells(path);
@@ -120,14 +102,13 @@ export const WordFinderGame: React.FC<WordFinderProps> = ({ onGameOver, onBack }
       return;
     }
 
-    // Otherwise start dragging
     setIsSelecting(true);
     setSelectionStart({ row, col });
     setSelectedCells([{ row, col }]);
     sounds.playLetterSelect(0);
   };
 
-  const handleCellMouseEnter = (row: number, col: number) => {
+  const handleCellMouseEnter = (row, col) => {
     if (!isSelecting || !selectionStart) return;
 
     const path = getLinePath(selectionStart, { row, col });
@@ -147,15 +128,14 @@ export const WordFinderGame: React.FC<WordFinderProps> = ({ onGameOver, onBack }
     }
   };
 
-  // Touch handlers
-  const handleTouchStart = (row: number, col: number) => {
+  const handleTouchStart = (row, col) => {
     setIsSelecting(true);
     setSelectionStart({ row, col });
     setSelectedCells([{ row, col }]);
     sounds.playLetterSelect(0);
   };
 
-  const handleTouchMove = (e: React.TouchEvent) => {
+  const handleTouchMove = (e) => {
     if (!isSelecting || !selectionStart || !gridRef.current) return;
 
     const touch = e.touches[0];
@@ -178,8 +158,7 @@ export const WordFinderGame: React.FC<WordFinderProps> = ({ onGameOver, onBack }
     handleMouseUp();
   };
 
-  // Validate selected word against hidden level words
-  const validateSelection = (cells: Point[]) => {
+  const validateSelection = (cells) => {
     const forwardStr = getSelectedString(cells);
     const reverseStr = forwardStr.split('').reverse().join('');
 
@@ -192,12 +171,10 @@ export const WordFinderGame: React.FC<WordFinderProps> = ({ onGameOver, onBack }
       const updatedFound = [...foundWords, matchedWord.word];
       setFoundWords(updatedFound);
 
-      // If this was the hinted word, clear hint
       if (hintedWord?.word === matchedWord.word) {
         setHintedWord(null);
       }
 
-      // Check level victory
       if (updatedFound.length === levelData.words.length) {
         handleLevelComplete();
       }
@@ -210,7 +187,6 @@ export const WordFinderGame: React.FC<WordFinderProps> = ({ onGameOver, onBack }
     setSelectedCells([]);
   };
 
-  // Level Complete Celebration
   const handleLevelComplete = () => {
     setIsTimerRunning(false);
     setIsLevelComplete(true);
@@ -222,7 +198,6 @@ export const WordFinderGame: React.FC<WordFinderProps> = ({ onGameOver, onBack }
       origin: { y: 0.6 }
     });
 
-    // Calculate stars (3 stars = under 60s & no hints, 2 stars = under 120s, 1 star = completed)
     let stars = 3;
     if (secondsElapsed > 90 || hintedWord) {
       stars = 2;
@@ -240,7 +215,6 @@ export const WordFinderGame: React.FC<WordFinderProps> = ({ onGameOver, onBack }
     }
   };
 
-  // Use Hint (Reveals start position of an unfound word)
   const handleUseHint = () => {
     if (hintsAvailable <= 0) return;
 
@@ -251,13 +225,11 @@ export const WordFinderGame: React.FC<WordFinderProps> = ({ onGameOver, onBack }
     storage.useWordFinderHint();
     setHintsAvailable(prev => Math.max(0, prev - 1));
 
-    // Pick first unfound word
     const target = unfound[0];
     setHintedWord(target);
   };
 
-  // Check if cell is in a found word (for permanent highlight)
-  const getCellFoundColor = (row: number, col: number): string | null => {
+  const getCellFoundColor = (row, col) => {
     for (const w of levelData.words) {
       if (foundWords.includes(w.word)) {
         const path = getLinePath(
@@ -272,18 +244,16 @@ export const WordFinderGame: React.FC<WordFinderProps> = ({ onGameOver, onBack }
     return null;
   };
 
-  // Check if cell is currently in active selection trail
-  const isCellSelected = (row: number, col: number): boolean => {
+  const isCellSelected = (row, col) => {
     return selectedCells.some(p => p.row === row && p.col === col);
   };
 
-  // Check if cell is currently hinted
-  const isCellHinted = (row: number, col: number): boolean => {
+  const isCellHinted = (row, col) => {
     if (!hintedWord) return false;
     return hintedWord.startRow === row && hintedWord.startCol === col;
   };
 
-  const formatTime = (secs: number) => {
+  const formatTime = (secs) => {
     const mins = Math.floor(secs / 60);
     const rem = secs % 60;
     return `${mins}:${rem < 10 ? '0' : ''}${rem}`;
@@ -446,7 +416,6 @@ export const WordFinderGame: React.FC<WordFinderProps> = ({ onGameOver, onBack }
 
         {/* Right Column: Target Words List & Level Info */}
         <div className="md:col-span-4 space-y-4">
-          {/* Target Words Card */}
           <div className="p-5 rounded-3xl bg-slate-900/90 border border-slate-800 shadow-xl">
             <div className="flex items-center justify-between mb-3">
               <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
@@ -458,7 +427,6 @@ export const WordFinderGame: React.FC<WordFinderProps> = ({ onGameOver, onBack }
               </span>
             </div>
 
-            {/* Word Chips */}
             <div className="flex flex-wrap gap-2">
               {levelData.words.map((w, idx) => {
                 const isFound = foundWords.includes(w.word);
@@ -579,7 +547,7 @@ export const WordFinderGame: React.FC<WordFinderProps> = ({ onGameOver, onBack }
               </button>
             </div>
 
-            {/* Chapter Tabs (10 Chapters of 100 levels each) */}
+            {/* Chapter Tabs */}
             <div className="flex gap-1.5 overflow-x-auto py-2 scrollbar-none border-b border-slate-800">
               {Array.from({ length: 10 }, (_, ch) => {
                 const start = ch * 100 + 1;
@@ -602,7 +570,7 @@ export const WordFinderGame: React.FC<WordFinderProps> = ({ onGameOver, onBack }
               })}
             </div>
 
-            {/* 100 Levels Grid for Current Chapter */}
+            {/* 100 Levels Grid */}
             <div className="grid grid-cols-5 sm:grid-cols-10 gap-2 p-3 overflow-y-auto flex-1 my-2">
               {Array.from({ length: 100 }, (_, idx) => {
                 const lvl = selectorChapter * 100 + idx + 1;
@@ -656,7 +624,6 @@ export const WordFinderGame: React.FC<WordFinderProps> = ({ onGameOver, onBack }
               {levelData.themeName}
             </p>
 
-            {/* Stars Display */}
             <div className="flex justify-center gap-2 text-3xl text-amber-400 my-4 animate-bounce">
               {Array.from({ length: 3 }, (_, i) => (
                 <span key={i} className={i < levelStars ? 'opacity-100' : 'opacity-20'}>
@@ -665,7 +632,6 @@ export const WordFinderGame: React.FC<WordFinderProps> = ({ onGameOver, onBack }
               ))}
             </div>
 
-            {/* Stats Summary */}
             <div className="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-3 my-4 space-y-1 text-xs">
               <div className="flex justify-between text-slate-300">
                 <span>Time Taken:</span>
@@ -682,7 +648,6 @@ export const WordFinderGame: React.FC<WordFinderProps> = ({ onGameOver, onBack }
               )}
             </div>
 
-            {/* Action Buttons */}
             <div className="flex gap-2">
               <button
                 onClick={() => loadLevel(currentLevel)}

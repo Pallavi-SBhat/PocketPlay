@@ -1,22 +1,17 @@
 import React, { useState } from 'react';
 import { X, PlusCircle, Code, CheckCircle, FileCode, Sparkles } from 'lucide-react';
 
-interface AddGameGuideModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-}
-
-export const AddGameGuideModal: React.FC<AddGameGuideModalProps> = ({ isOpen, onClose }) => {
+export const AddGameGuideModal = ({ isOpen, onClose }) => {
   const [copied, setCopied] = useState(false);
 
   if (!isOpen) return null;
 
-  const codeSnippet = `// 1. Create your game component in src/games/your-game/YourGame.tsx:
+  const codeSnippet = `// 1. Create your game component in src/games/your-game/YourGame.jsx:
 export const YourGame = ({ onGameOver, onBack }) => {
   return <div>Your Offline Game Logic Here</div>;
 };
 
-// 2. Open src/games/registry.ts and add it to GAMES_LIST:
+// 2. Open src/games/registry.js and add it to GAMES_LIST:
 {
   id: 'your-game-id',
   title: 'Your Game Title',
@@ -67,7 +62,7 @@ export const YourGame = ({ onGameOver, onBack }) => {
             <span className="w-6 h-6 rounded-full bg-indigo-600 text-white font-bold text-xs flex items-center justify-center flex-shrink-0">1</span>
             <div className="text-xs">
               <strong className="text-white block mb-0.5">Create your Game Folder</strong>
-              <span className="text-slate-300">Create a new folder in <code className="text-indigo-300 font-mono">src/games/snake/</code> or <code className="text-indigo-300 font-mono">src/games/2048/</code>.</span>
+              <span className="text-slate-300">Create a new folder in <code className="text-indigo-300 font-mono">src/games/pong/</code> or <code className="text-indigo-300 font-mono">src/games/2048/</code>.</span>
             </div>
           </div>
 
@@ -82,8 +77,8 @@ export const YourGame = ({ onGameOver, onBack }) => {
           <div className="flex gap-3 p-3.5 rounded-2xl bg-slate-800/60 border border-slate-700/60">
             <span className="w-6 h-6 rounded-full bg-indigo-600 text-white font-bold text-xs flex items-center justify-center flex-shrink-0">3</span>
             <div className="text-xs">
-              <strong className="text-white block mb-0.5">Register in registry.ts</strong>
-              <span className="text-slate-300">Append your game's metadata to the <code className="text-indigo-300 font-mono">GAMES_LIST</code> array in <code className="text-indigo-300 font-mono">src/games/registry.ts</code>. The store UI will automatically render it!</span>
+              <strong className="text-white block mb-0.5">Register in registry.js</strong>
+              <span className="text-slate-300">Append your game's metadata to the <code className="text-indigo-300 font-mono">GAMES_LIST</code> array in <code className="text-indigo-300 font-mono">src/games/registry.js</code>. The store UI will automatically render it!</span>
             </div>
           </div>
         </div>
@@ -115,7 +110,7 @@ export const YourGame = ({ onGameOver, onBack }) => {
             <span>Suggested Games for the Next Few Days:</span>
           </h4>
           <div className="flex flex-wrap gap-2">
-            {['Retro Snake', '2048 Number Puzzle', 'Brick Breaker / Arkanoid', 'Minesweeper Neon', 'Space Invaders', 'Memory Match Cards'].map(name => (
+            {['2048 Number Puzzle', 'Brick Breaker / Arkanoid', 'Minesweeper Neon', 'Space Invaders', 'Memory Match Cards', 'Pong Classic'].map(name => (
               <span key={name} className="px-3 py-1 rounded-lg bg-slate-800 border border-slate-700 text-xs font-medium text-slate-300">
                 {name}
               </span>
