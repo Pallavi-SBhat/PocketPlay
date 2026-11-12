@@ -3,6 +3,7 @@ import { XoxGame } from './xox/XoxGame';
 import { SnakeAndLadderGame } from './snake-and-ladder/SnakeAndLadderGame';
 import { WordFinderGame } from './word-finder/WordFinderGame';
 import { SnakeGame } from './snake/SnakeGame';
+import { Game2048 } from './game-2048/Game2048';
 
 export const GAMES_LIST = [
   {
@@ -118,6 +119,31 @@ export const GAMES_LIST = [
       { key: 'R', action: 'Quick restart' }
     ],
     component: SnakeGame
+  },
+  {
+    id: 'game-2048',
+    title: '2048 Neon Pulse',
+    tagline: 'Slide, combine numbers, and forge the legendary 2048 tile!',
+    description: 'The addictive sliding tile math puzzle transformed with vibrant glowing neon colors, rich synthesized chimes, and smooth responsive controls. Plan moves, slide numbers, trigger merges, utilize 1-step undo, and chase the ultimate 2048 and 4096 trophies offline!',
+    category: 'Puzzle',
+    tags: ['2048', 'Puzzle', 'Math', 'Offline', 'Brain'],
+    thumbnail: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=600&q=80',
+    badge: 'Popular Puzzle',
+    accentColor: '#f59e0b',
+    instructions: [
+      'Use Arrow keys, WASD, touch swipe, or the on-screen D-Pad to slide all tiles in one direction.',
+      'When two tiles with the same number collide during a slide, they merge into one with double value!',
+      'Each merge scores points matching the value of the newly created tile.',
+      'Keep matching until you create the glorious 2048 tile (or keep going for 4096+)!',
+      'If the 4x4 grid fills up with no available adjacent merges, the game is over.',
+      'Made a misstep? Click the Undo (U) button to reverse your last move.'
+    ],
+    controls: [
+      { key: 'Arrow Keys / WASD / Swipe', action: 'Slide tiles Up, Down, Left, or Right' },
+      { key: 'U / Z', action: 'Undo last move (1 step)' },
+      { key: 'R', action: 'Restart new game' }
+    ],
+    component: Game2048
   }
 ];
 

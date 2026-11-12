@@ -96,7 +96,7 @@ export const App = () => {
                 </h1>
 
                 <p className="mt-3 sm:mt-4 text-sm sm:text-base text-slate-300 leading-relaxed max-w-xl">
-                  Welcome to GameStack! Jump straight into retro classics like Flappy Bird, tactical XOX, multiplayer Snake & Ladder, Word Finder, and Retro Snake. All player profiles, leaderboards, and high scores stay 100% saved locally on this machine.
+                  Welcome to GameStack! Jump straight into retro classics like Flappy Bird, tactical XOX, multiplayer Snake & Ladder, Word Finder, Retro Snake, and 2048 Neon Pulse. All player profiles, leaderboards, and high scores stay 100% saved locally on this machine.
                 </p>
 
                 {/* Quick Launch Buttons */}
@@ -109,17 +109,17 @@ export const App = () => {
                   </button>
 
                   <button
-                    onClick={() => handleLaunchGame('xox')}
-                    className="px-5 py-3 rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold text-xs sm:text-sm shadow-lg shadow-cyan-500/25 active:scale-95 transition-all flex items-center gap-2"
+                    onClick={() => handleLaunchGame('game-2048')}
+                    className="px-5 py-3 rounded-2xl bg-gradient-to-r from-amber-500 to-rose-600 hover:from-amber-400 hover:to-rose-500 text-white font-bold text-xs sm:text-sm shadow-lg shadow-rose-500/25 active:scale-95 transition-all flex items-center gap-2"
                   >
-                    <span>Play XOX</span>
+                    <span>Play 2048</span>
                   </button>
 
                   <button
-                    onClick={() => handleLaunchGame('snake-ladder')}
-                    className="px-5 py-3 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-bold text-xs sm:text-sm shadow-lg shadow-emerald-500/25 active:scale-95 transition-all flex items-center gap-2"
+                    onClick={() => handleLaunchGame('retro-snake')}
+                    className="px-5 py-3 rounded-2xl bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-400 hover:to-green-500 text-white font-bold text-xs sm:text-sm shadow-lg shadow-emerald-500/25 active:scale-95 transition-all flex items-center gap-2"
                   >
-                    <span>Play Snake & Ladder</span>
+                    <span>Play Retro Snake</span>
                   </button>
 
                   <button
@@ -130,10 +130,17 @@ export const App = () => {
                   </button>
 
                   <button
-                    onClick={() => handleLaunchGame('retro-snake')}
-                    className="px-5 py-3 rounded-2xl bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-400 hover:to-green-500 text-white font-bold text-xs sm:text-sm shadow-lg shadow-emerald-500/25 active:scale-95 transition-all flex items-center gap-2"
+                    onClick={() => handleLaunchGame('snake-ladder')}
+                    className="px-5 py-3 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-bold text-xs sm:text-sm shadow-lg shadow-emerald-500/25 active:scale-95 transition-all flex items-center gap-2"
                   >
-                    <span>Play Retro Snake</span>
+                    <span>Play Snake & Ladder</span>
+                  </button>
+
+                  <button
+                    onClick={() => handleLaunchGame('xox')}
+                    className="px-5 py-3 rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold text-xs sm:text-sm shadow-lg shadow-cyan-500/25 active:scale-95 transition-all flex items-center gap-2"
+                  >
+                    <span>Play XOX</span>
                   </button>
 
                   <button
