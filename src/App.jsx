@@ -96,11 +96,18 @@ export const App = () => {
                 </h1>
 
                 <p className="mt-3 sm:mt-4 text-sm sm:text-base text-slate-300 leading-relaxed max-w-xl">
-                  Welcome to GameStack! Jump straight into retro classics like Flappy Bird, tactical XOX, multiplayer Snake & Ladder, Word Finder, Retro Snake, and 2048 Neon Pulse. All player profiles, leaderboards, and high scores stay 100% saved locally on this machine.
+                  Welcome to GameStack! Jump straight into retro classics like Flappy Bird, tactical XOX, multiplayer Snake & Ladder, Word Finder, Retro Snake, 2048 Neon Pulse, and Neon Breakout. All player profiles, leaderboards, and high scores stay 100% saved locally on this machine.
                 </p>
 
                 {/* Quick Launch Buttons */}
                 <div className="mt-6 flex flex-wrap items-center gap-3">
+                  <button
+                    onClick={() => handleLaunchGame('brick-breaker')}
+                    className="px-5 py-3 rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold text-xs sm:text-sm shadow-lg shadow-cyan-500/25 active:scale-95 transition-all flex items-center gap-2"
+                  >
+                    <span>Play Neon Breakout</span>
+                  </button>
+
                   <button
                     onClick={() => handleLaunchGame('flappy-bird')}
                     className="px-5 py-3 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white font-bold text-xs sm:text-sm shadow-lg shadow-orange-500/25 active:scale-95 transition-all flex items-center gap-2"

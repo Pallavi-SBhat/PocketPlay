@@ -4,6 +4,7 @@ import { SnakeAndLadderGame } from './snake-and-ladder/SnakeAndLadderGame';
 import { WordFinderGame } from './word-finder/WordFinderGame';
 import { SnakeGame } from './snake/SnakeGame';
 import { Game2048 } from './game-2048/Game2048';
+import { BrickBreakerGame } from './brick-breaker/BrickBreakerGame';
 
 export const GAMES_LIST = [
   {
@@ -144,6 +145,32 @@ export const GAMES_LIST = [
       { key: 'R', action: 'Restart new game' }
     ],
     component: Game2048
+  },
+  {
+    id: 'brick-breaker',
+    title: 'Neon Breakout',
+    tagline: 'Shatter glowing neon bricks with high-energy ball physics & power-ups!',
+    description: 'The supreme offline arcade brick breaker! Control your glowing neon paddle, bounce the energy orb with angle-sensitive physics, unleash devastating power-ups (Multi-Ball, Wide Paddle, Laser Cannons, Fireballs, and Slow-Mo), and ignite explosive bomb bricks across 5 handcrafted stages!',
+    category: 'Arcade',
+    tags: ['Breakout', 'Arcade', 'Action', 'Offline', 'Powerups'],
+    thumbnail: 'https://images.unsplash.com/photo-1579373903781-fd5c0c30c4cd?auto=format&fit=crop&w=600&q=80',
+    badge: 'Arcade Action',
+    accentColor: '#06b6d4',
+    instructions: [
+      'Move your paddle using the mouse, touch drag, or Arrow Keys / A & D.',
+      'Press Spacebar or click the screen to launch the ball from your paddle.',
+      'Bounce the ball into bricks to shatter them and earn points.',
+      'Catch falling power-ups: ⚡ Multi-Ball, 🛡️ Wide Paddle, 🔫 Laser Cannon, 🔥 Fireball, ⏱️ Slow-Mo, ❤️ Extra Life.',
+      'Trigger 💣 Bomb Bricks to unleash massive chain-reaction explosions!',
+      'Build consecutive combos for massive score multipliers and clear all 5 stages.'
+    ],
+    controls: [
+      { key: 'Mouse / Touch / Arrow Keys / A & D', action: 'Move paddle left and right' },
+      { key: 'Spacebar / Click', action: 'Launch ball / Fire laser cannons' },
+      { key: 'P', action: 'Pause / Resume game' },
+      { key: 'R', action: 'Restart stage' }
+    ],
+    component: BrickBreakerGame
   }
 ];
 
