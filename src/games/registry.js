@@ -5,6 +5,7 @@ import { WordFinderGame } from './word-finder/WordFinderGame';
 import { SnakeGame } from './snake/SnakeGame';
 import { Game2048 } from './game-2048/Game2048';
 import { BrickBreakerGame } from './brick-breaker/BrickBreakerGame';
+import { SpaceInvadersGame } from './space-invaders/SpaceInvadersGame';
 
 export const GAMES_LIST = [
   {
@@ -171,6 +172,32 @@ export const GAMES_LIST = [
       { key: 'R', action: 'Restart stage' }
     ],
     component: BrickBreakerGame
+  },
+  {
+    id: 'space-invaders',
+    title: 'Space Invaders Neon',
+    tagline: 'Defend Earth from alien fleets with marching rhythms, shields & laser firepower!',
+    description: 'The golden age of arcade gaming revived in brilliant neon cyber aesthetics! Command your mobile plasma cannon, take shelter behind eroding energy bunkers, blast through 50 marching invaders, snipe mystery flying saucers for massive bonuses, and experience the iconic accelerating 4-beat rhythm offline!',
+    category: 'Arcade',
+    tags: ['Space', 'Invaders', 'Retro', 'Shooter', 'Action', 'Offline'],
+    thumbnail: 'https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?auto=format&fit=crop&w=600&q=80',
+    badge: 'Retro Classic',
+    accentColor: '#ec4899',
+    instructions: [
+      'Steer your defense cannon using Arrow Keys, A & D, mouse movement, or touch.',
+      'Tap Spacebar or click the screen to fire plasma lasers at the alien fleet.',
+      'Take cover behind the 4 green defense bunkers; beware that both alien bombs and player lasers slowly erode them!',
+      'Shoot the mystery red Flying Saucer (UFO) when it sweeps across the top for +50 to +300 bonus points!',
+      'Watch out: the fewer invaders remain, the faster they march across the screen!',
+      'Catch glowing power-up capsules for ⚡ Triple Plasma, 🔥 Rapid Fire, 🛡️ Energy Shields, and 💣 EMP Detonators.'
+    ],
+    controls: [
+      { key: 'Arrow Keys / A & D / Touch', action: 'Steer cannon left and right' },
+      { key: 'Spacebar / Tap Screen', action: 'Fire plasma cannon' },
+      { key: 'P', action: 'Pause / Resume defense' },
+      { key: 'R', action: 'Restart wave' }
+    ],
+    component: SpaceInvadersGame
   }
 ];
 
