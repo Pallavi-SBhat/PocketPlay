@@ -6,6 +6,7 @@ import { SnakeGame } from './snake/SnakeGame';
 import { Game2048 } from './game-2048/Game2048';
 import { BrickBreakerGame } from './brick-breaker/BrickBreakerGame';
 import { SpaceInvadersGame } from './space-invaders/SpaceInvadersGame';
+import { CyberBlocksGame } from './cyber-blocks/CyberBlocksGame';
 
 export const GAMES_LIST = [
   {
@@ -198,6 +199,35 @@ export const GAMES_LIST = [
       { key: 'R', action: 'Restart wave' }
     ],
     component: SpaceInvadersGame
+  },
+  {
+    id: 'cyber-blocks',
+    title: 'Cyber Blocks',
+    tagline: 'Classic falling tetromino puzzle with glowing neon blocks & Tetris clears!',
+    description: 'The world\'s most famous falling block puzzle redesigned with cyber arcade visuals, smooth rotation wall-kicks, ghost landing shadows, next queue, hold piece slot, and high-energy synthesized line clear chimes. Rotate, soft/hard drop, clear lines, and trigger legendary 4-line Tetris clears offline!',
+    category: 'Puzzle',
+    tags: ['Tetris', 'Blocks', 'Puzzle', 'Retro', 'Offline', 'Brain'],
+    thumbnail: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=600&q=80',
+    badge: 'Legendary Puzzle',
+    accentColor: '#06b6d4',
+    instructions: [
+      'Steer falling blocks left and right with Arrow Keys, A & D, or on-screen buttons.',
+      'Rotate pieces with Up Arrow or W (supports full wall-kick rotation).',
+      'Press C or click Hold to store a difficult piece for strategic placement later.',
+      'Hold Down Arrow / S for soft drop, or tap Spacebar for an instant hard drop slam!',
+      'Fill complete horizontal lines to dissolve them and score big points.',
+      'Clear 4 lines at once to trigger a glorious TETRIS fanfare with huge point multipliers!'
+    ],
+    controls: [
+      { key: 'Arrow Left / Right / A & D', action: 'Move falling piece horizontally' },
+      { key: 'Arrow Up / W', action: 'Rotate piece clockwise' },
+      { key: 'Arrow Down / S', action: 'Soft drop (faster fall)' },
+      { key: 'Spacebar', action: 'Hard drop slam immediately' },
+      { key: 'C / Shift', action: 'Hold current piece' },
+      { key: 'P', action: 'Pause / Resume game' },
+      { key: 'R', action: 'Restart puzzle' }
+    ],
+    component: CyberBlocksGame
   }
 ];
 
