@@ -96,11 +96,18 @@ export const App = () => {
                 </h1>
 
                 <p className="mt-3 sm:mt-4 text-sm sm:text-base text-slate-300 leading-relaxed max-w-xl">
-                  Welcome to GameStack! Jump straight into retro classics like Cyber Blocks, Space Invaders, Flappy Bird, tactical XOX, multiplayer Snake & Ladder, Word Finder, Retro Snake, 2048 Neon Pulse, and Neon Breakout. All player profiles, leaderboards, and high scores stay 100% saved locally on this machine.
+                  Welcome to GameStack! Jump straight into retro classics like Cyber Mines, Cyber Blocks, Space Invaders, Flappy Bird, tactical XOX, multiplayer Snake & Ladder, Word Finder, Retro Snake, 2048 Neon Pulse, and Neon Breakout. All player profiles, leaderboards, and high scores stay 100% saved locally on this machine.
                 </p>
 
                 {/* Quick Launch Buttons */}
                 <div className="mt-6 flex flex-wrap items-center gap-3">
+                  <button
+                    onClick={() => handleLaunchGame('cyber-mines')}
+                    className="px-5 py-3 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-bold text-xs sm:text-sm shadow-lg shadow-emerald-500/25 active:scale-95 transition-all flex items-center gap-2"
+                  >
+                    <span>Play Cyber Mines</span>
+                  </button>
+
                   <button
                     onClick={() => handleLaunchGame('cyber-blocks')}
                     className="px-5 py-3 rounded-2xl bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-400 hover:to-purple-500 text-white font-bold text-xs sm:text-sm shadow-lg shadow-cyan-500/25 active:scale-95 transition-all flex items-center gap-2"

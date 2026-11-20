@@ -7,6 +7,7 @@ import { Game2048 } from './game-2048/Game2048';
 import { BrickBreakerGame } from './brick-breaker/BrickBreakerGame';
 import { SpaceInvadersGame } from './space-invaders/SpaceInvadersGame';
 import { CyberBlocksGame } from './cyber-blocks/CyberBlocksGame';
+import { CyberMinesGame } from './cyber-mines/CyberMinesGame';
 
 export const GAMES_LIST = [
   {
@@ -228,6 +229,31 @@ export const GAMES_LIST = [
       { key: 'R', action: 'Restart puzzle' }
     ],
     component: CyberBlocksGame
+  },
+  {
+    id: 'cyber-mines',
+    title: 'Cyber Mines',
+    tagline: 'Classic tactical minesweeper with safe first clicks & cascade reveals!',
+    description: 'The definitive offline logic deduction game revived with glowing neon cyber grids! Enjoy 100% guaranteed safe first-click openings, chord clicking to clear revealed clusters, flag marking, 3 difficulty tiers (Novice, Veteran, Master), and instant local best time leaderboards!',
+    category: 'Strategy',
+    tags: ['Minesweeper', 'Logic', 'Puzzle', 'Strategy', 'Offline', 'Classic'],
+    thumbnail: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=600&q=80',
+    badge: 'Logic Classic',
+    accentColor: '#10b981',
+    instructions: [
+      'Your first click is 100% safe and always opens a wide cascade opening!',
+      'Numbers indicate how many dangerous cyber mines are touching that cell.',
+      'Right-click or toggle Flag mode to tag suspected mine locations (🚩).',
+      'Click an already-revealed number cell when you\'ve flagged its neighboring mines to chord-reveal all adjacent safe cells!',
+      'Clear every safe square on the grid without detonating a mine to claim victory.'
+    ],
+    controls: [
+      { key: 'Left Click / Tap', action: 'Reveal cell (Dig mode)' },
+      { key: 'Right Click / Flag Mode', action: 'Place / Remove flag' },
+      { key: 'Click Revealed Number', action: 'Chord-reveal adjacent safe cells' },
+      { key: 'Status Emoji', action: 'Restart / Reset board' }
+    ],
+    component: CyberMinesGame
   }
 ];
 
